@@ -41,13 +41,7 @@ export default function RootLayout({
         {/* Hero media */}
         <link rel="preload" as="image" href="/ARK.svg" />
         <link rel="preload" as="image" href="/ARK%20AUTOMATION.svg" />
-        <link
-          rel="preload"
-          as="image"
-          href="/projects/gigatexas.jpg"
-          imageSrcSet="/projects/gigatexas.jpg"
-          imageSizes="100vw"
-        />
+        <link rel="preload" as="image" href="/projects/gigatexas.jpg" />
         <link rel="preload" as="image" href="/hero/Sequence01.jpg" />
         <link rel="preload" as="video" href="/hero/Sequence01.webm" />
         <link rel="preload" as="video" href="/hero/Sequence01.mp4" />
