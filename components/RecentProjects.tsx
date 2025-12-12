@@ -18,7 +18,7 @@ const ITEMS: ProjectItem[] = [
     title: "Building the Core of Tomorrow’s Gigafactory",
     summary:
       "Powering Tesla’s new Model Y production with advanced electrical and automation systems.",
-    imageSrc: "/projects/gigatexas2.jpg",
+    imageSrc: "/projects/gigatexas.jpg",
     href: "/projects/tesla-giga-texas",
   },
   {
