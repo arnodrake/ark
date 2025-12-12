@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import SafeImage from "@/components/SafeImage";
 
 type ProjectItem = {
   title: string; // headline
@@ -54,7 +55,7 @@ export default function RecentProjects() {
               {/* Cover */}
               <div className="relative aspect-[16/9] bg-gradient-to-br from-neutral-100 to-neutral-200 overflow-hidden">
                 {p.imageSrc ? (
-                  <Image
+                  <SafeImage
                     src={p.imageSrc}
                     alt={`${p.tag} cover`}
                     fill
