@@ -6,6 +6,7 @@ import HeroVideo from "@/components/HeroVideo";
 import { Anton } from "next/font/google";
 import RecentProjects from "@/components/RecentProjects";
 import Image from "next/image";
+import SafeImage from "@/components/SafeImage";
 import SiteFooter from "@/components/SiteFooter";
 import { useState, Fragment } from "react";
 
@@ -115,7 +116,7 @@ export default function Home() {
                 { src: "/projects/Rivian.jpg", alt: "Rivian manufacturing" },
               ].map((img, i) => (
                 <div key={`collage-${i}`} className="relative">
-                  <Image src={img.src} alt={img.alt} fill sizes="(min-width:1024px) 50vw, 50vw" className="object-cover" />
+                  <SafeImage src={img.src} alt={img.alt} fill sizes="(min-width:1024px) 50vw, 50vw" className="object-cover" />
                   <div className="absolute inset-0 bg-black/30" />
                 </div>
               ))}
@@ -134,7 +135,7 @@ export default function Home() {
       <Section id="projects" dark className="relative overflow-hidden" title={<span className="relative z-10">Representative Projects</span>}>
         {/* 背景圖（不攔截互動、位於文字下方） */}
         <div className="pointer-events-none absolute inset-0 z-0">
-          <Image src="/projects/gigatexas.jpg" alt="Giga Texas background" fill sizes="100vw" className="object-cover" priority quality={95} />
+          <SafeImage src="/projects/gigatexas.jpg" alt="Giga Texas background" fill sizes="100vw" className="object-cover" priority={true as any} />
           <div className="absolute inset-0 bg-black/55" />
         </div>
         <div className="relative z-10 grid gap-6 sm:grid-cols-1 md:grid-cols-2 px-1 md:px-0">
