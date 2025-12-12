@@ -1,6 +1,7 @@
-import { Variants } from "framer-motion";
+import { Variants, cubicBezier } from "framer-motion";
 
-export const easeStandard: number[] = [0.4, 0, 0.2, 1];
+// Use framer-motion's typed easing function to satisfy Easing/Easing[] types
+export const easeStandard = cubicBezier(0.4, 0, 0.2, 1);
 
 export const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 24 },
