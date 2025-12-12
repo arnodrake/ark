@@ -15,7 +15,7 @@ export default function TeslaGigaTexas() {
 
       <figure className="mt-6 relative aspect-[16/9] w-full overflow-hidden rounded-lg bg-neutral-200">
         <Image
-          src="/projects/tesla-giga-texas.jpg"
+          src="/projects/gigatexas.jpg"
           alt="Tesla Giga Texas — aerial view"
           fill
           sizes="100vw"
