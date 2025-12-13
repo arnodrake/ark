@@ -229,7 +229,7 @@ export default function Home() {
       >
         <div className="max-w-3xl text-center sm:text-left">
           <div className="mt-6 flex flex-col sm:flex-row sm:flex-wrap gap-3 justify-center sm:justify-start">
-            <a href="mailto:info@arkautomationgroup.com" className="inline-flex items-center justify-center rounded-md bg-white px-5 py-3 text-neutral-900 font-medium hover:bg-white/90">
+            <a href="/contact" className="inline-flex items-center justify-center rounded-md bg-white px-5 py-3 text-neutral-900 font-medium hover:bg-white/90">
               Email Us
             </a>
             <a href="/contact" className="inline-flex items-center justify-center rounded-md border border-white/30 px-5 py-3 text-white font-medium hover:bg-white/10">

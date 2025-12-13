@@ -29,11 +29,12 @@ export default function ContactPage() {
     setStatus("submitting");
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData.entries());
+    const submitData = { ...data, mode };
 
     try {
       if (isCareers && resumeFile) {
         const fd = new FormData();
-        Object.entries(data).forEach(([k, v]) => fd.append(k, String(v)));
+        Object.entries(submitData).forEach(([k, v]) => fd.append(k, String(v)));
         fd.append("resume", resumeFile);
         await fetch("/api/contact", {
           method: "POST",
@@ -43,19 +44,11 @@ export default function ContactPage() {
         await fetch("/api/contact", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
+          body: JSON.stringify(submitData),
         });
       }
       setStatus("success");
       setMessage("Thanks — we will get back to you shortly.");
-
-      const body = encodeURIComponent(
-        isCareers
-          ? `Name: ${data.name}\nOccupation: ${data.company}\nEmail: ${data.email}\nState: ${data.state}\nResume: ${resumeFile?.name || "(not attached)"}\n\nDetails:\n${data.details || ""}`
-          : `Name: ${data.name}\nCompany: ${data.company}\nEmail: ${data.email}\nState: ${data.state}\nProject Scope: ${data.scope}\n\nDetails:\n${data.details || ""}`
-      );
-      const subject = encodeURIComponent(isCareers ? "Career Inquiry" : "Project Inquiry");
-      window.location.href = `mailto:admin@arkautomationgroup.com?subject=${subject}&body=${body}`;
     } catch (err) {
       setStatus("error");
       setMessage("Submission failed. Please email us directly at admin@arkautomationgroup.com");
