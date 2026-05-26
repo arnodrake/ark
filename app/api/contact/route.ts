@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
     await resend.emails.send({
       from: RESEND_FROM,
       to: CONTACT_TO_EMAIL,
-      reply_to: typeof payload.email === "string" ? payload.email : undefined,
+      replyTo: typeof payload.email === "string" ? payload.email : undefined,
       subject,
       text: textBody,
     });
