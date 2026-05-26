@@ -58,8 +58,10 @@ export default function ContactPage() {
   return (
     <main>
       <section className="relative overflow-hidden bg-neutral-950 text-white mt-16">
-        <div className="mx-auto max-w-7xl px-6 py-[164px]">
-          <h1 className={`${anton.className} -ml-[100px] text-5xl md:text-7xl lg:text-8xl font-normal tracking-tight uppercase text-white`}>
+        <div className="mx-auto max-w-7xl px-6 py-24 md:py-[164px]">
+          <h1
+            className={`${anton.className} text-[32px] leading-[1.1] sm:text-4xl md:text-7xl md:leading-none lg:text-8xl md:-ml-[100px] font-normal tracking-tight uppercase text-white`}
+          >
             CONNECT WITH US
           </h1>
         </div>
