@@ -7,6 +7,7 @@ import { Anton } from "next/font/google";
 import RecentProjects from "@/components/RecentProjects";
 import Image from "next/image";
 import SafeImage from "@/components/SafeImage";
+import CollageScrollReveal from "@/components/CollageScrollReveal";
 import SiteFooter from "@/components/SiteFooter";
 import { useState, Fragment } from "react";
 
@@ -102,32 +103,8 @@ export default function Home() {
         </div>
       </Section>
 
-      <Section id="capabilities" subdued padYClass="py-[5px]" className="bg-neutral-200">
-        {/* Full-bleed wrapper: break out of Section inner padding/max-width */}
-        <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen">
-          <div className="relative w-screen aspect-[1/1] md:aspect-[16/9] overflow-hidden">
-            {/* 2x2 collage full-bleed, rectangular with uniform gutters */}
-            <div className="absolute inset-0 px-[5px] py-0">
-              <div className="grid grid-cols-2 grid-rows-2 gap-[5px] h-full">
-              {[
-                { src: "/projects/gigatexas.jpg", alt: "Electrical & automation – Tesla Giga Texas" },
-                { src: "/projects/Lucid.jpg", alt: "Automation integration – Lucid Motors" },
-                { src: "/projects/Benz.jpg", alt: "Mechanical & electrical – Mercedes-Benz" },
-                { src: "/projects/Rivian.jpg", alt: "Rivian manufacturing" },
-              ].map((img, i) => (
-                <div key={`collage-${i}`} className="relative">
-                  <SafeImage src={img.src} alt={img.alt} fill sizes="(min-width:1024px) 50vw, 50vw" className="object-cover" />
-                  <div className="absolute inset-0 bg-black/30" />
-                </div>
-              ))}
-              </div>
-            </div>
-            {/* Center ARK logo at exact cross-point */}
-            <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-              <Image src="/ARK.svg" alt="ARK" width={390} height={180} className="w-auto h-28 md:h-[216px] invert brightness-0 drop-shadow-[0_4px_16px_rgba(0,0,0,0.7)]" />
-            </div>
-          </div>
-        </div>
+      <Section id="capabilities" subdued padYClass="py-[5px]" className="bg-neutral-200 overflow-hidden">
+        <CollageScrollReveal />
       </Section>
 
 
