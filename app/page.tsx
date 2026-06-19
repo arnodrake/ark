@@ -8,6 +8,7 @@ import RecentProjects from "@/components/RecentProjects";
 import Image from "next/image";
 import SafeImage from "@/components/SafeImage";
 import CollageScrollReveal from "@/components/CollageScrollReveal";
+import ProjectFocusCard, { ProjectFocusGrid } from "@/components/ProjectFocusCard";
 import SiteFooter from "@/components/SiteFooter";
 import { useState, Fragment } from "react";
 
@@ -109,13 +110,21 @@ export default function Home() {
 
 
 
-      <Section id="projects" dark className="relative overflow-hidden" title={<span className="relative z-10">Representative Projects</span>}>
+      <Section id="projects" dark noMotion className="relative overflow-hidden">
         {/* 背景圖（不攔截互動、位於文字下方） */}
-        <div className="pointer-events-none absolute inset-0 z-0">
-          <SafeImage src="/projects/gigatexas.jpg" alt="Giga Texas background" fill sizes="100vw" className="object-cover" priority={true as any} />
+        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+          <div className="absolute inset-0 scale-110">
+            <SafeImage src="/projects/gigatexas.jpg" alt="Giga Texas background" fill sizes="100vw" className="object-cover blur-xl" priority={true as any} />
+          </div>
           <div className="absolute inset-0 bg-black/55" />
         </div>
-        <div className="relative z-10 grid gap-6 sm:grid-cols-1 md:grid-cols-2 px-1 md:px-0">
+        <ProjectFocusGrid className="relative z-10">
+          <ProjectFocusCard className="mb-10">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight">
+              Representative Projects
+            </h2>
+          </ProjectFocusCard>
+          <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 px-1 md:px-0">
           {[
             {
               t: "Tesla – Texas",
@@ -150,7 +159,7 @@ export default function Home() {
           ].map((p, i) => {
             const isSemi = p.t.includes("TSMC") && p.t.includes("ASML") && p.t.includes("TEL");
             return (
-              <div key={p.t} className="rounded-xl border border-neutral-200 bg-white/90 backdrop-blur-sm p-5 md:p-6 shadow-sm transform-gpu transition-transform duration-200 hover:scale-105">
+              <ProjectFocusCard key={p.t} className="rounded-xl border border-neutral-200 bg-white/90 backdrop-blur-sm p-5 md:p-6 shadow-sm transition-transform duration-200 hover:scale-105">
                 {isSemi ? (
                   <div className="mb-2 overflow-visible">
                     {/* Mobile: title與logos同一水平線（logos靠右，間距更緊） */}
@@ -184,10 +193,11 @@ export default function Home() {
                   </div>
                 )}
                 <p className="mt-2 text-neutral-700 text-[15px] md:text-base leading-7 md:leading-7 break-words">{p.d}</p>
-              </div>
+              </ProjectFocusCard>
             );
           })}
-        </div>
+          </div>
+        </ProjectFocusGrid>
       </Section>
 
 

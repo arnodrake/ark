@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ["192.168.11.50", "192.168.11.50:3000", "Admins-MacBook-Pro.local"],
   turbopack: {
     // Force correct project root so public/ assets are served from this app
     root: __dirname,

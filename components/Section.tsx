@@ -12,9 +12,10 @@ type SectionProps = PropsWithChildren<{
   dark?: boolean; // for dark background
   center?: boolean; // center align content & title
   padYClass?: string; // override vertical padding
+  noMotion?: boolean; // skip entrance animation — show content immediately
 }>;
 
-export function Section({ id, className, title, children, subdued, dark, center, padYClass }: SectionProps) {
+export function Section({ id, className, title, children, subdued, dark, center, padYClass, noMotion }: SectionProps) {
   const baseColors = dark
     ? "bg-neutral-950 text-white"
     : subdued
@@ -29,21 +30,33 @@ export function Section({ id, className, title, children, subdued, dark, center,
     >
       <div className={`mx-auto max-w-7xl px-4 md:px-6 ${center ? "text-center" : ""}`}>
         {title ? (
-          <motion.div
-            variants={staggerContainer}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.2 }}
-            className="mb-10"
-          >
-            <motion.h2 variants={fadeInUp} className={`text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight ${center ? "mx-auto" : ""}`}>
-              {title}
-            </motion.h2>
-          </motion.div>
+          noMotion ? (
+            <div className="mb-10">
+              <h2 className={`text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight ${center ? "mx-auto" : ""}`}>
+                {title}
+              </h2>
+            </div>
+          ) : (
+            <motion.div
+              variants={staggerContainer}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.2 }}
+              className="mb-10"
+            >
+              <motion.h2 variants={fadeInUp} className={`text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight ${center ? "mx-auto" : ""}`}>
+                {title}
+              </motion.h2>
+            </motion.div>
+          )
         ) : null}
-        <motion.div variants={staggerContainer} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }}>
-          {children}
-        </motion.div>
+        {noMotion ? (
+          <div>{children}</div>
+        ) : (
+          <motion.div variants={staggerContainer} initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }}>
+            {children}
+          </motion.div>
+        )}
       </div>
     </section>
   );

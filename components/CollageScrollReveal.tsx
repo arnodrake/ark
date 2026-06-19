@@ -1,14 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import Image from "next/image";
 import {
   motion,
-  useScroll,
   useTransform,
   useReducedMotion,
   useMotionValue,
-  useMotionValueEvent,
   MotionValue,
 } from "framer-motion";
 import SafeImage from "@/components/SafeImage";
@@ -27,6 +25,16 @@ const QUADRANT_OFFSETS = [
   { x: -115, y: 115 },
   { x: 115, y: 115 },
 ] as const;
+
+/** Mirrors useScroll offset: ["start end", "start 0.15"]. */
+function computeScrollProgress(el: HTMLElement): number {
+  const top = el.getBoundingClientRect().top;
+  const vh = window.innerHeight;
+  const startTop = vh;
+  const endTop = vh * 0.15;
+  const raw = (startTop - top) / (startTop - endTop);
+  return Math.max(0, Math.min(1, raw));
+}
 
 function CollagePanel({
   index,
@@ -57,7 +65,7 @@ function CollagePanel({
   );
 
   return (
-    <motion.div className="relative" style={{ x, y, opacity }}>
+    <motion.div className="relative transform-gpu will-change-transform" style={{ x, y, opacity }}>
       <SafeImage
         src={img.src}
         alt={img.alt}
@@ -74,13 +82,13 @@ export default function CollageScrollReveal() {
   const containerRef = useRef<HTMLDivElement>(null);
   const isFullyHiddenRef = useRef(true);
   const reduced = useReducedMotion() ?? false;
-
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "start 0.15"],
-  });
-
   const progress = useMotionValue(reduced ? 1 : 0);
+
+  const syncProgress = useCallback(() => {
+    const el = containerRef.current;
+    if (!el || isFullyHiddenRef.current) return;
+    progress.set(Math.max(progress.get(), computeScrollProgress(el)));
+  }, [progress]);
 
   useEffect(() => {
     if (reduced) {
@@ -93,25 +101,32 @@ export default function CollageScrollReveal() {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.intersectionRatio === 0) {
+        if (!entry.isIntersecting) {
           isFullyHiddenRef.current = true;
           progress.set(0);
-        } else {
-          isFullyHiddenRef.current = false;
-          progress.set(Math.max(progress.get(), scrollYProgress.get()));
+          return;
         }
+
+        isFullyHiddenRef.current = false;
+        progress.set(Math.max(progress.get(), computeScrollProgress(el)));
       },
-      { threshold: [0] }
+      { threshold: [0, 0.01] }
     );
 
     observer.observe(el);
-    return () => observer.disconnect();
-  }, [progress, reduced, scrollYProgress]);
+    syncProgress();
 
-  useMotionValueEvent(scrollYProgress, "change", (latest) => {
-    if (reduced || isFullyHiddenRef.current) return;
-    progress.set(Math.max(progress.get(), latest));
-  });
+    window.addEventListener("scroll", syncProgress, { passive: true });
+    window.addEventListener("resize", syncProgress, { passive: true });
+    window.addEventListener("touchmove", syncProgress, { passive: true });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", syncProgress);
+      window.removeEventListener("resize", syncProgress);
+      window.removeEventListener("touchmove", syncProgress);
+    };
+  }, [progress, reduced, syncProgress]);
 
   const logoOpacity = useTransform(
     progress,
@@ -144,7 +159,7 @@ export default function CollageScrollReveal() {
           </div>
         </div>
         <motion.div
-          className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
+          className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 transform-gpu"
           style={{ opacity: logoOpacity, scale: logoScale }}
         >
           <Image
