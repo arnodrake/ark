@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
 import { usePathname } from "next/navigation";
 import { Anton } from "next/font/google";
+import { scrollToHash } from "@/lib/scroll-to-hash";
 
 const anton = Anton({ subsets: ["latin"], weight: "400", display: "swap" });
 
@@ -21,7 +22,7 @@ const NAV: MenuItem[] = [
     label: "About",
     href: "/#about",
     children: [
-      { label: "Recent Projects", href: "/#projects" },
+      { label: "Representative Projects", href: "/#projects" },
       { label: "Our Mission", href: "/#future" },
     ],
   },
@@ -94,6 +95,24 @@ export default function Header() {
       }
     }, 100);
     setCloseTimer(t);
+  };
+
+  const handleHashNav = (e: ReactMouseEvent<HTMLAnchorElement>, href: string, closeMobile = false) => {
+    const hash = href.includes("#") ? href.slice(href.indexOf("#")) : "";
+    if (!hash || pathname !== "/") return;
+
+    if (hash === "#future" && window.matchMedia("(min-width: 768px)").matches) {
+      e.preventDefault();
+      window.history.pushState(null, "", href);
+      scrollToHash(hash, true);
+      setOpenIdx(null);
+      setActiveIdx(null);
+      setPanelHover(false);
+      if (closeMobile) {
+        setMobileClosing(true);
+        setMobileOpen(false);
+      }
+    }
   };
 
   // 在行動選單展開/收起期間，頂部黑底由 overlay 動畫負責，header 本身保持透明以確保兩段動畫連貫
@@ -342,6 +361,7 @@ export default function Header() {
                         className="block rounded-md px-3 py-[5px] text-lg md:text-xl font-semibold text-white/90 hover:bg-white/10 hover:text-white"
                         autoFocus={ci === 0}
                         onKeyDown={(e) => { if (e.key === "Escape") { setOpenIdx(null); setActiveIdx(null); } }}
+                        onClick={(e) => handleHashNav(e, c.href ?? "#")}
                       >
                         {c.label}
                       </Link>
@@ -400,8 +420,18 @@ export default function Header() {
               {mobileSection === "about" && (
                 <div className="space-y-2">
                   <div className="mt-1 grid">
-                    <Link href="/#projects" className="py-2 text-xl" onClick={() => { setMobileClosing(true); setMobileOpen(false); }}>Recent Projects</Link>
-                    <Link href="/#future" className="py-2 text-xl" onClick={() => { setMobileClosing(true); setMobileOpen(false); }}>Our Mission</Link>
+                    <Link href="/#projects" className="py-2 text-xl" onClick={() => { setMobileClosing(true); setMobileOpen(false); }}>Representative Projects</Link>
+                    <Link
+                      href="/#future"
+                      className="py-2 text-xl"
+                      onClick={(e) => {
+                        handleHashNav(e, "/#future", true);
+                        setMobileClosing(true);
+                        setMobileOpen(false);
+                      }}
+                    >
+                      Our Mission
+                    </Link>
                   </div>
                 </div>
               )}

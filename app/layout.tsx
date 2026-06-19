@@ -3,6 +3,7 @@ import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import ScrollToTop from "@/components/ScrollToTop";
+import HashScroll from "@/components/HashScroll";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -81,6 +82,7 @@ export default function RootLayout({
         {/* no top padding; header overlays hero */}
         {children}
         <ScrollToTop />
+        <HashScroll />
       </body>
     </html>
   );
