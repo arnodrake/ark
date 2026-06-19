@@ -126,20 +126,27 @@ type ProjectFocusCardProps = {
 export function MobileViewportEdgeBlur({ sectionId = "projects" }: { sectionId?: string }) {
   const reduced = useReducedMotion() ?? false;
   const isMobile = useIsMobile();
-  const [active, setActive] = useState(false);
+  const [showEdges, setShowEdges] = useState(false);
 
   useEffect(() => {
     if (!isMobile || reduced) {
-      setActive(false);
+      setShowEdges(false);
       return;
     }
 
-    const el = document.getElementById(sectionId);
-    if (!el) return;
+    const projectsEl = document.getElementById(sectionId);
+    if (!projectsEl) return;
 
     const sync = () => {
-      const rect = el.getBoundingClientRect();
-      setActive(rect.top < window.innerHeight && rect.bottom > 0);
+      const vh = window.innerHeight;
+      const projectsRect = projectsEl.getBoundingClientRect();
+      const contactEl = document.getElementById("contact");
+      const contactTop = contactEl?.getBoundingClientRect().top ?? Infinity;
+
+      const projectsInView = projectsRect.top < vh && projectsRect.bottom > 0;
+      const contactReached = contactTop < vh;
+
+      setShowEdges(projectsInView && !contactReached);
     };
 
     sync();
@@ -154,7 +161,7 @@ export function MobileViewportEdgeBlur({ sectionId = "projects" }: { sectionId?:
     };
   }, [isMobile, reduced, sectionId]);
 
-  if (!isMobile || reduced || !active) return null;
+  if (!isMobile || reduced || !showEdges) return null;
 
   const edgeClass =
     "pointer-events-none fixed inset-x-0 z-[25] h-[14dvh] md:hidden backdrop-blur-md";
