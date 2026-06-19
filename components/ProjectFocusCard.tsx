@@ -40,16 +40,22 @@ function getFocusCurve(isMobile: boolean) {
     : { peak: 0.26, blurReturnStart: 0.6 };
 }
 
-/** Mobile: per-card bell curve — center sharp, top/bottom edges blurred. */
+/** Mobile: subtle edge blur only — center band stays fully sharp. */
 function computeCardFocusProgress(el: HTMLElement): number {
   const rect = el.getBoundingClientRect();
   const vh = window.innerHeight;
   const cardCenter = rect.top + rect.height / 2;
-  const viewportCenter = vh * 0.48;
-  const falloff = vh * 0.44;
-  const dist = Math.abs(cardCenter - viewportCenter);
-  const t = Math.min(1, dist / falloff);
-  return 1 - Math.pow(t, 0.62);
+
+  const sharpTop = vh * 0.24;
+  const sharpBottom = vh * 0.76;
+
+  if (cardCenter >= sharpTop && cardCenter <= sharpBottom) return 1;
+
+  const dist =
+    cardCenter < sharpTop ? sharpTop - cardCenter : cardCenter - sharpBottom;
+  const edgeBand = vh * 0.12;
+  const t = Math.min(1, dist / edgeBand);
+  return 1 - Math.pow(t, 1.15) * 0.2;
 }
 
 /** Focus 0 = max blur, 1 = sharp. Peaks mid-scroll; blur returns when scrolling past. */
@@ -145,7 +151,7 @@ export default function ProjectFocusCard({
   const isMobile = useContext(FocusMobileContext);
   const reduced = useReducedMotion() ?? false;
   const cardRef = useRef<HTMLDivElement>(null);
-  const cardProgress = useMotionValue(reduced ? 1 : 0);
+  const cardProgress = useMotionValue(reduced ? 1 : 1);
   const fallback = useMotionValue(1);
   const usePerCardMobile = isMobile && !titleFocus;
 
@@ -190,7 +196,7 @@ export default function ProjectFocusCard({
     if (reduced) return "blur(0px)";
     const progress = typeof v === "number" ? v : 0;
     const hover = typeof h === "number" ? h : 0;
-    const max = isMobile ? 5.5 : 8;
+    const max = isMobile ? 2 : 8;
     const scrollBlur = max * (1 - progress);
     return `blur(${(scrollBlur * (1 - hover)).toFixed(2)}px)`;
   });
@@ -198,7 +204,7 @@ export default function ProjectFocusCard({
     if (reduced) return 1;
     const progress = typeof v === "number" ? v : 0;
     const hover = typeof h === "number" ? h : 0;
-    const min = isMobile ? 0.86 : 0.72;
+    const min = isMobile ? 0.94 : 0.72;
     const scrollOpacity = min + (1 - min) * progress;
     return scrollOpacity + (1 - scrollOpacity) * hover;
   });
