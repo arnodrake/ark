@@ -40,20 +40,21 @@ function getFocusCurve(isMobile: boolean) {
     : { peak: 0.26, blurReturnStart: 0.6 };
 }
 
-/** Mobile: narrow edge band with strong bokeh-style blur outside the sharp zone. */
+/** Mobile: blur only in the top/bottom 15% of the viewport; middle 70% stays sharp. */
 function computeCardFocusProgress(el: HTMLElement): number {
   const rect = el.getBoundingClientRect();
   const vh = window.innerHeight;
   const cardCenter = rect.top + rect.height / 2;
 
-  const sharpTop = vh * 0.34;
-  const sharpBottom = vh * 0.66;
+  const edge = 0.15;
+  const sharpTop = vh * edge;
+  const sharpBottom = vh * (1 - edge);
 
   if (cardCenter >= sharpTop && cardCenter <= sharpBottom) return 1;
 
   const dist =
     cardCenter < sharpTop ? sharpTop - cardCenter : cardCenter - sharpBottom;
-  const edgeBand = vh * 0.06;
+  const edgeBand = vh * edge;
   const t = Math.min(1, dist / edgeBand);
   return 1 - Math.pow(t, 1.6) * 0.55;
 }
@@ -153,16 +154,16 @@ export default function ProjectFocusCard({
   const cardRef = useRef<HTMLDivElement>(null);
   const cardProgress = useMotionValue(reduced ? 1 : 1);
   const fallback = useMotionValue(1);
-  const usePerCardMobile = isMobile && !titleFocus;
+  const usePositionMobile = isMobile;
 
   const syncCard = useCallback(() => {
     const el = cardRef.current;
-    if (!el || reduced || !usePerCardMobile) return;
+    if (!el || reduced || !usePositionMobile) return;
     cardProgress.set(computeCardFocusProgress(el));
-  }, [cardProgress, reduced, usePerCardMobile]);
+  }, [cardProgress, reduced, usePositionMobile]);
 
   useEffect(() => {
-    if (reduced || !usePerCardMobile) {
+    if (reduced || !usePositionMobile) {
       cardProgress.set(1);
       return;
     }
@@ -177,12 +178,13 @@ export default function ProjectFocusCard({
       window.removeEventListener("resize", syncCard);
       window.removeEventListener("touchmove", syncCard);
     };
-  }, [cardProgress, reduced, syncCard, usePerCardMobile]);
+  }, [cardProgress, reduced, syncCard, usePositionMobile]);
 
-  const source = usePerCardMobile ? cardProgress : gridProgress ?? fallback;
+  const source = usePositionMobile ? cardProgress : gridProgress ?? fallback;
   const effective = useTransform(source, (v) => {
     const p = typeof v === "number" ? v : 0;
-    return titleFocus ? remapTitleFocus(p, isMobile) : p;
+    if (titleFocus && !isMobile) return remapTitleFocus(p, isMobile);
+    return p;
   });
   const hoverFocus = useMotionValue(0);
   const hoverFocusSpring = useSpring(hoverFocus, {
