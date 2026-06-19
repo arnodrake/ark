@@ -89,7 +89,7 @@ export default function Home() {
       </section>
 
       {/* Recent Projects band below Hero */}
-      <section aria-labelledby="recent-projects">
+      <section id="recent-projects" aria-labelledby="recent-projects-heading">
         <RecentProjects />
       </section>
 
