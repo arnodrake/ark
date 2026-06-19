@@ -40,28 +40,6 @@ function getFocusCurve(isMobile: boolean) {
     : { peak: 0.26, blurReturnStart: 0.6 };
 }
 
-/** Mobile: blur when element intersects the top/bottom 15% viewport bands (symmetric). */
-function computeCardFocusProgress(el: HTMLElement): number {
-  const rect = el.getBoundingClientRect();
-  const vh = window.innerHeight;
-  const edge = 0.15;
-  const zoneHeight = vh * edge;
-  const topZoneEnd = zoneHeight;
-  const bottomZoneStart = vh - zoneHeight;
-
-  let edgeBlur = 0;
-
-  if (rect.top < topZoneEnd) {
-    edgeBlur = Math.max(edgeBlur, Math.min(1, (topZoneEnd - rect.top) / zoneHeight));
-  }
-
-  if (rect.bottom > bottomZoneStart) {
-    edgeBlur = Math.max(edgeBlur, Math.min(1, (rect.bottom - bottomZoneStart) / zoneHeight));
-  }
-
-  return 1 - Math.pow(edgeBlur, 1.6) * 0.55;
-}
-
 /** Focus 0 = max blur, 1 = sharp. Peaks mid-scroll; blur returns when scrolling past. */
 function computeFocusProgress(el: HTMLElement, isMobile: boolean): number {
   const rect = el.getBoundingClientRect();
@@ -77,7 +55,7 @@ function computeFocusProgress(el: HTMLElement, isMobile: boolean): number {
   return Math.max(0, (1 - t) / (1 - blurReturnStart));
 }
 
-/** Title stays blurred longer; clears when first card row is ~half visible. */
+/** Title stays blurred longer; clears when first project row is ~half visible. */
 function remapTitleFocus(v: number, isMobile: boolean): number {
   const start = isMobile ? 0.22 : 0.28;
   const end = isMobile ? 0.58 : 0.66;
@@ -103,12 +81,12 @@ export function ProjectFocusGrid({ children, className }: ProjectFocusGridProps)
 
   const sync = useCallback(() => {
     const el = ref.current;
-    if (!el || reduced) return;
+    if (!el || reduced || isMobile) return;
     progress.set(computeFocusProgress(el, isMobile));
   }, [progress, reduced, isMobile]);
 
   useEffect(() => {
-    if (reduced) {
+    if (reduced || isMobile) {
       progress.set(1);
       return;
     }
@@ -116,14 +94,12 @@ export function ProjectFocusGrid({ children, className }: ProjectFocusGridProps)
     sync();
     window.addEventListener("scroll", sync, { passive: true });
     window.addEventListener("resize", sync, { passive: true });
-    window.addEventListener("touchmove", sync, { passive: true });
 
     return () => {
       window.removeEventListener("scroll", sync);
       window.removeEventListener("resize", sync);
-      window.removeEventListener("touchmove", sync);
     };
-  }, [progress, reduced, sync]);
+  }, [progress, reduced, sync, isMobile]);
 
   return (
     <FocusProgressContext.Provider value={progress}>
@@ -154,36 +130,8 @@ export default function ProjectFocusCard({
   const gridProgress = useContext(FocusProgressContext);
   const isMobile = useContext(FocusMobileContext);
   const reduced = useReducedMotion() ?? false;
-  const cardRef = useRef<HTMLDivElement>(null);
-  const cardProgress = useMotionValue(reduced ? 1 : 1);
   const fallback = useMotionValue(1);
-  const usePositionMobile = isMobile;
-
-  const syncCard = useCallback(() => {
-    const el = cardRef.current;
-    if (!el || reduced || !usePositionMobile) return;
-    cardProgress.set(computeCardFocusProgress(el));
-  }, [cardProgress, reduced, usePositionMobile]);
-
-  useEffect(() => {
-    if (reduced || !usePositionMobile) {
-      cardProgress.set(1);
-      return;
-    }
-
-    syncCard();
-    window.addEventListener("scroll", syncCard, { passive: true });
-    window.addEventListener("resize", syncCard, { passive: true });
-    window.addEventListener("touchmove", syncCard, { passive: true });
-
-    return () => {
-      window.removeEventListener("scroll", syncCard);
-      window.removeEventListener("resize", syncCard);
-      window.removeEventListener("touchmove", syncCard);
-    };
-  }, [cardProgress, reduced, syncCard, usePositionMobile]);
-
-  const source = usePositionMobile ? cardProgress : gridProgress ?? fallback;
+  const source = gridProgress ?? fallback;
   const effective = useTransform(source, (v) => {
     const p = typeof v === "number" ? v : 0;
     if (titleFocus && !isMobile) return remapTitleFocus(p, isMobile);
@@ -198,28 +146,24 @@ export default function ProjectFocusCard({
   const canHover = interactive && !isMobile && !reduced;
 
   const filter = useTransform([effective, hoverFocusSpring], ([v, h]) => {
-    if (reduced) return "blur(0px)";
+    if (reduced || isMobile) return "blur(0px)";
     const progress = typeof v === "number" ? v : 0;
     const hover = typeof h === "number" ? h : 0;
-    const max = isMobile ? 6 : 8;
-    const defocus = 1 - progress;
-    const scrollBlur = max * Math.pow(defocus, 1.35);
+    const scrollBlur = 8 * Math.pow(1 - progress, 1.35);
     return `blur(${(scrollBlur * (1 - hover)).toFixed(2)}px)`;
   });
   const opacity = useTransform([effective, hoverFocusSpring], ([v, h]) => {
-    if (reduced) return 1;
+    if (reduced || isMobile) return 1;
     const progress = typeof v === "number" ? v : 0;
     const hover = typeof h === "number" ? h : 0;
-    const min = isMobile ? 0.82 : 0.72;
-    const scrollOpacity = min + (1 - min) * progress;
+    const scrollOpacity = 0.72 + 0.28 * progress;
     return scrollOpacity + (1 - scrollOpacity) * hover;
   });
 
   return (
     <motion.div
-      ref={cardRef}
-      style={{ filter, opacity }}
-      className={`transform-gpu will-change-[filter,opacity,transform] ${className ?? ""}`}
+      style={isMobile ? undefined : { filter, opacity }}
+      className={`${isMobile ? "" : "transform-gpu will-change-[filter,opacity,transform]"} ${className ?? ""}`}
       onHoverStart={canHover ? () => hoverFocus.set(1) : undefined}
       onHoverEnd={canHover ? () => hoverFocus.set(0) : undefined}
       whileHover={canHover ? { scale: 1.05, y: -4 } : undefined}

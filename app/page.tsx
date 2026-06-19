@@ -9,6 +9,7 @@ import Image from "next/image";
 import SafeImage from "@/components/SafeImage";
 import CollageScrollReveal from "@/components/CollageScrollReveal";
 import ProjectFocusCard, { ProjectFocusGrid } from "@/components/ProjectFocusCard";
+import ProjectViewportEdgeBlur from "@/components/ProjectViewportEdgeBlur";
 import SiteFooter from "@/components/SiteFooter";
 import { useState, Fragment } from "react";
 
@@ -119,6 +120,7 @@ export default function Home() {
 
 
       <Section id="projects" dark noMotion className="relative overflow-hidden">
+        <ProjectViewportEdgeBlur />
         {/* 背景圖（不攔截互動、位於文字下方） */}
         <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
           <div className="absolute inset-0 scale-110">
