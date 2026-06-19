@@ -40,23 +40,26 @@ function getFocusCurve(isMobile: boolean) {
     : { peak: 0.26, blurReturnStart: 0.6 };
 }
 
-/** Mobile: blur only in the top/bottom 15% of the viewport; middle 70% stays sharp. */
+/** Mobile: blur when element intersects the top/bottom 15% viewport bands (symmetric). */
 function computeCardFocusProgress(el: HTMLElement): number {
   const rect = el.getBoundingClientRect();
   const vh = window.innerHeight;
-  const cardCenter = rect.top + rect.height / 2;
-
   const edge = 0.15;
-  const sharpTop = vh * edge;
-  const sharpBottom = vh * (1 - edge);
+  const zoneHeight = vh * edge;
+  const topZoneEnd = zoneHeight;
+  const bottomZoneStart = vh - zoneHeight;
 
-  if (cardCenter >= sharpTop && cardCenter <= sharpBottom) return 1;
+  let edgeBlur = 0;
 
-  const dist =
-    cardCenter < sharpTop ? sharpTop - cardCenter : cardCenter - sharpBottom;
-  const edgeBand = vh * edge;
-  const t = Math.min(1, dist / edgeBand);
-  return 1 - Math.pow(t, 1.6) * 0.55;
+  if (rect.top < topZoneEnd) {
+    edgeBlur = Math.max(edgeBlur, Math.min(1, (topZoneEnd - rect.top) / zoneHeight));
+  }
+
+  if (rect.bottom > bottomZoneStart) {
+    edgeBlur = Math.max(edgeBlur, Math.min(1, (rect.bottom - bottomZoneStart) / zoneHeight));
+  }
+
+  return 1 - Math.pow(edgeBlur, 1.6) * 0.55;
 }
 
 /** Focus 0 = max blur, 1 = sharp. Peaks mid-scroll; blur returns when scrolling past. */
