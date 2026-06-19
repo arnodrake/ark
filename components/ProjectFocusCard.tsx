@@ -68,40 +68,6 @@ function remapTitleFocus(v: number, isMobile: boolean): number {
 const FocusProgressContext = createContext<MotionValue<number> | null>(null);
 const FocusMobileContext = createContext(false);
 
-const EDGE_MASK_TOP =
-  "linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.45) 45%, transparent 100%)";
-const EDGE_MASK_BOTTOM =
-  "linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.45) 45%, transparent 100%)";
-
-/** Mobile-only: fixed viewport edge bands — blur 15% top/bottom, not whole cards. */
-function ProjectFocusEdgeBlur({ position }: { position: "top" | "bottom" }) {
-  const isMobile = useIsMobile();
-  const reduced = useReducedMotion() ?? false;
-
-  if (!isMobile || reduced) return null;
-
-  const isTop = position === "top";
-
-  return (
-    <div
-      aria-hidden
-      className={`pointer-events-none sticky z-20 h-[15dvh] w-full md:hidden ${
-        isTop ? "top-0 -mb-[15dvh]" : "bottom-0 -mt-[15dvh]"
-      }`}
-    >
-      <div
-        className="h-full w-full"
-        style={{
-          backdropFilter: "blur(3px)",
-          WebkitBackdropFilter: "blur(3px)",
-          maskImage: isTop ? EDGE_MASK_TOP : EDGE_MASK_BOTTOM,
-          WebkitMaskImage: isTop ? EDGE_MASK_TOP : EDGE_MASK_BOTTOM,
-        }}
-      />
-    </div>
-  );
-}
-
 type ProjectFocusGridProps = {
   children: ReactNode;
   className?: string;
@@ -115,12 +81,12 @@ export function ProjectFocusGrid({ children, className }: ProjectFocusGridProps)
 
   const sync = useCallback(() => {
     const el = ref.current;
-    if (!el || reduced || isMobile) return;
-    progress.set(computeFocusProgress(el, false));
+    if (!el || reduced) return;
+    progress.set(computeFocusProgress(el, isMobile));
   }, [progress, reduced, isMobile]);
 
   useEffect(() => {
-    if (reduced || isMobile) {
+    if (reduced) {
       progress.set(1);
       return;
     }
@@ -128,20 +94,20 @@ export function ProjectFocusGrid({ children, className }: ProjectFocusGridProps)
     sync();
     window.addEventListener("scroll", sync, { passive: true });
     window.addEventListener("resize", sync, { passive: true });
+    window.addEventListener("touchmove", sync, { passive: true });
 
     return () => {
       window.removeEventListener("scroll", sync);
       window.removeEventListener("resize", sync);
+      window.removeEventListener("touchmove", sync);
     };
-  }, [progress, reduced, isMobile, sync]);
+  }, [progress, reduced, sync]);
 
   return (
     <FocusProgressContext.Provider value={progress}>
       <FocusMobileContext.Provider value={isMobile}>
         <div ref={ref} className={className}>
-          <ProjectFocusEdgeBlur position="top" />
           {children}
-          <ProjectFocusEdgeBlur position="bottom" />
         </div>
       </FocusMobileContext.Provider>
     </FocusProgressContext.Provider>
@@ -170,8 +136,8 @@ export default function ProjectFocusCard({
   const source = gridProgress ?? fallback;
   const effective = useTransform(source, (v) => {
     const p = typeof v === "number" ? v : 0;
-    if (titleFocus && !isMobile) return remapTitleFocus(p, isMobile);
-    return p;
+    if (isMobile) return 1;
+    return titleFocus ? remapTitleFocus(p, isMobile) : p;
   });
   const hoverFocus = useMotionValue(0);
   const hoverFocusSpring = useSpring(hoverFocus, {
