@@ -93,14 +93,22 @@ export default function Home() {
         <RecentProjects />
       </section>
 
-      <Section id="future" dark center title={<span>Built for the Future</span>}>
-        <div className="max-w-5xl mx-auto space-y-4">
-          <p className="text-xl md:text-[22px] text-white/80 max-w-4xl mx-auto leading-relaxed md:leading-[1.6]">
-            At Ark Automation, we deliver integrated electrical, network, and automation systems that power the world’s most advanced industrial systems.
-          </p>
-          <p className="text-xl md:text-[22px] text-white/80 max-w-4xl mx-auto leading-relaxed md:leading-[1.6]">
-            Through advanced engineering and disciplined execution, we elevate industrial systems to the next level of reliability, efficiency, and safety.
-          </p>
+      <Section id="future" dark>
+        <div className="text-left md:text-center">
+          <h2 className="mb-8 md:mb-10 text-4xl md:text-4xl lg:text-5xl font-semibold tracking-tight">
+            Built for the Future
+          </h2>
+          <div className="space-y-4 max-w-4xl md:mx-auto">
+            <p className="text-lg md:text-[22px] text-white/80 leading-relaxed md:leading-[1.6]">
+              Ark Automation delivers electrical, network, and automation solutions for advanced manufacturing and industrial facilities.
+            </p>
+            <p className="text-lg md:text-[22px] text-white/80 leading-relaxed md:leading-[1.6]">
+              From semiconductor fabs and automotive production lines to mission-critical infrastructure, we execute complex projects with precision, safety, and speed.
+            </p>
+            <p className="text-lg md:text-[22px] text-white/80 leading-relaxed md:leading-[1.6]">
+              Through disciplined field execution and technical expertise, we deliver the infrastructure behind tomorrow&apos;s industry.
+            </p>
+          </div>
         </div>
       </Section>
 
