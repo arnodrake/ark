@@ -55,7 +55,7 @@ function computeFocusProgress(el: HTMLElement, isMobile: boolean): number {
   return Math.max(0, (1 - t) / (1 - blurReturnStart));
 }
 
-/** Title stays blurred longer; clears when first project row is ~half visible. */
+/** Title stays blurred longer; clears when first card row is ~half visible. */
 function remapTitleFocus(v: number, isMobile: boolean): number {
   const start = isMobile ? 0.22 : 0.28;
   const end = isMobile ? 0.58 : 0.66;
@@ -68,6 +68,40 @@ function remapTitleFocus(v: number, isMobile: boolean): number {
 const FocusProgressContext = createContext<MotionValue<number> | null>(null);
 const FocusMobileContext = createContext(false);
 
+const edgeBlurMask = {
+  top: "linear-gradient(to bottom, black 70%, transparent 100%)",
+  bottom: "linear-gradient(to top, black 70%, transparent 100%)",
+} as const;
+
+function MobileViewportEdgeBlur({ active }: { active: boolean }) {
+  if (!active) return null;
+
+  return (
+    <>
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-x-0 top-0 z-[25] h-[15dvh] md:hidden"
+        style={{
+          backdropFilter: "blur(6px)",
+          WebkitBackdropFilter: "blur(6px)",
+          maskImage: edgeBlurMask.top,
+          WebkitMaskImage: edgeBlurMask.top,
+        }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-x-0 bottom-0 z-[25] h-[15dvh] md:hidden"
+        style={{
+          backdropFilter: "blur(6px)",
+          WebkitBackdropFilter: "blur(6px)",
+          maskImage: edgeBlurMask.bottom,
+          WebkitMaskImage: edgeBlurMask.bottom,
+        }}
+      />
+    </>
+  );
+}
+
 type ProjectFocusGridProps = {
   children: ReactNode;
   className?: string;
@@ -78,15 +112,16 @@ export function ProjectFocusGrid({ children, className }: ProjectFocusGridProps)
   const reduced = useReducedMotion() ?? false;
   const isMobile = useIsMobile();
   const progress = useMotionValue(reduced ? 1 : 0);
+  const [edgeBlurActive, setEdgeBlurActive] = useState(false);
 
   const sync = useCallback(() => {
     const el = ref.current;
-    if (!el || reduced || isMobile) return;
+    if (!el || reduced) return;
     progress.set(computeFocusProgress(el, isMobile));
   }, [progress, reduced, isMobile]);
 
   useEffect(() => {
-    if (reduced || isMobile) {
+    if (reduced) {
       progress.set(1);
       return;
     }
@@ -94,17 +129,37 @@ export function ProjectFocusGrid({ children, className }: ProjectFocusGridProps)
     sync();
     window.addEventListener("scroll", sync, { passive: true });
     window.addEventListener("resize", sync, { passive: true });
+    window.addEventListener("touchmove", sync, { passive: true });
 
     return () => {
       window.removeEventListener("scroll", sync);
       window.removeEventListener("resize", sync);
+      window.removeEventListener("touchmove", sync);
     };
-  }, [progress, reduced, sync, isMobile]);
+  }, [progress, reduced, sync]);
+
+  useEffect(() => {
+    if (!isMobile || reduced) {
+      setEdgeBlurActive(false);
+      return;
+    }
+
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setEdgeBlurActive(entry.isIntersecting),
+      { threshold: 0 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [isMobile, reduced]);
 
   return (
     <FocusProgressContext.Provider value={progress}>
       <FocusMobileContext.Provider value={isMobile}>
         <div ref={ref} className={className}>
+          <MobileViewportEdgeBlur active={edgeBlurActive} />
           {children}
         </div>
       </FocusMobileContext.Provider>
@@ -131,12 +186,14 @@ export default function ProjectFocusCard({
   const isMobile = useContext(FocusMobileContext);
   const reduced = useReducedMotion() ?? false;
   const fallback = useMotionValue(1);
-  const source = gridProgress ?? fallback;
+  const source = !isMobile ? gridProgress ?? fallback : fallback;
+
   const effective = useTransform(source, (v) => {
+    if (isMobile) return 1;
     const p = typeof v === "number" ? v : 0;
-    if (titleFocus && !isMobile) return remapTitleFocus(p, isMobile);
-    return p;
+    return titleFocus ? remapTitleFocus(p, false) : p;
   });
+
   const hoverFocus = useMotionValue(0);
   const hoverFocusSpring = useSpring(hoverFocus, {
     stiffness: 520,
@@ -152,6 +209,7 @@ export default function ProjectFocusCard({
     const scrollBlur = 8 * Math.pow(1 - progress, 1.35);
     return `blur(${(scrollBlur * (1 - hover)).toFixed(2)}px)`;
   });
+
   const opacity = useTransform([effective, hoverFocusSpring], ([v, h]) => {
     if (reduced || isMobile) return 1;
     const progress = typeof v === "number" ? v : 0;
@@ -162,8 +220,8 @@ export default function ProjectFocusCard({
 
   return (
     <motion.div
-      style={isMobile ? undefined : { filter, opacity }}
-      className={`${isMobile ? "" : "transform-gpu will-change-[filter,opacity,transform]"} ${className ?? ""}`}
+      style={{ filter, opacity }}
+      className={`transform-gpu will-change-[filter,opacity,transform] ${className ?? ""}`}
       onHoverStart={canHover ? () => hoverFocus.set(1) : undefined}
       onHoverEnd={canHover ? () => hoverFocus.set(0) : undefined}
       whileHover={canHover ? { scale: 1.05, y: -4 } : undefined}
