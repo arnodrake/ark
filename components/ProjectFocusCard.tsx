@@ -12,6 +12,7 @@ import {
 import {
   motion,
   useMotionValue,
+  useSpring,
   useTransform,
   useReducedMotion,
   type MotionValue,
@@ -36,7 +37,7 @@ function useIsMobile() {
 function getFocusCurve(isMobile: boolean) {
   return isMobile
     ? { peak: 0.16, blurReturnStart: 0.93 }
-    : { peak: 0.4, blurReturnStart: 0.6 };
+    : { peak: 0.26, blurReturnStart: 0.6 };
 }
 
 /** Focus 0 = max blur, 1 = sharp. Peaks mid-scroll; blur returns when scrolling past. */
@@ -49,9 +50,19 @@ function computeFocusProgress(el: HTMLElement, isMobile: boolean): number {
   const t = Math.max(0, Math.min(1, (vh - rect.top) / travel));
   const { peak, blurReturnStart } = getFocusCurve(isMobile);
 
-  if (t <= peak) return t / peak;
+  if (t <= peak) return Math.pow(t / peak, 0.65);
   if (t <= blurReturnStart) return 1;
   return Math.max(0, (1 - t) / (1 - blurReturnStart));
+}
+
+/** Title stays blurred longer; clears when first card row is ~half visible. */
+function remapTitleFocus(v: number, isMobile: boolean): number {
+  const start = isMobile ? 0.22 : 0.28;
+  const end = isMobile ? 0.58 : 0.66;
+
+  if (v <= start) return (v / start) * 0.18;
+  if (v >= end) return 1;
+  return 0.18 + ((v - start) / (end - start)) * 0.82;
 }
 
 const FocusProgressContext = createContext<MotionValue<number> | null>(null);
@@ -106,30 +117,60 @@ export function ProjectFocusGrid({ children, className }: ProjectFocusGridProps)
 type ProjectFocusCardProps = {
   children: ReactNode;
   className?: string;
+  /** Hover to snap focus clear (desktop); includes lift scale. */
+  interactive?: boolean;
+  /** Section title: delayed focus until first project row is partly visible. */
+  titleFocus?: boolean;
 };
 
-export default function ProjectFocusCard({ children, className }: ProjectFocusCardProps) {
+export default function ProjectFocusCard({
+  children,
+  className,
+  interactive = false,
+  titleFocus = false,
+}: ProjectFocusCardProps) {
   const progress = useContext(FocusProgressContext);
   const isMobile = useContext(FocusMobileContext);
   const reduced = useReducedMotion() ?? false;
   const fallback = useMotionValue(1);
   const source = progress ?? fallback;
-
-  const filter = useTransform(source, (v) => {
-    if (reduced) return "blur(0px)";
-    const max = isMobile ? 4 : 8;
-    return `blur(${max * (1 - v)}px)`;
+  const effective = useTransform(source, (v) => {
+    const p = typeof v === "number" ? v : 0;
+    return titleFocus ? remapTitleFocus(p, isMobile) : p;
   });
-  const opacity = useTransform(source, (v) => {
+  const hoverFocus = useMotionValue(0);
+  const hoverFocusSpring = useSpring(hoverFocus, {
+    stiffness: 520,
+    damping: 34,
+    mass: 0.55,
+  });
+  const canHover = interactive && !isMobile && !reduced;
+
+  const filter = useTransform([effective, hoverFocusSpring], ([v, h]) => {
+    if (reduced) return "blur(0px)";
+    const progress = typeof v === "number" ? v : 0;
+    const hover = typeof h === "number" ? h : 0;
+    const max = isMobile ? 4 : 8;
+    const scrollBlur = max * (1 - progress);
+    return `blur(${(scrollBlur * (1 - hover)).toFixed(2)}px)`;
+  });
+  const opacity = useTransform([effective, hoverFocusSpring], ([v, h]) => {
     if (reduced) return 1;
+    const progress = typeof v === "number" ? v : 0;
+    const hover = typeof h === "number" ? h : 0;
     const min = isMobile ? 0.9 : 0.72;
-    return min + (1 - min) * v;
+    const scrollOpacity = min + (1 - min) * progress;
+    return scrollOpacity + (1 - scrollOpacity) * hover;
   });
 
   return (
     <motion.div
       style={{ filter, opacity }}
-      className={`transform-gpu will-change-[filter,opacity] ${className ?? ""}`}
+      className={`transform-gpu will-change-[filter,opacity,transform] ${className ?? ""}`}
+      onHoverStart={canHover ? () => hoverFocus.set(1) : undefined}
+      onHoverEnd={canHover ? () => hoverFocus.set(0) : undefined}
+      whileHover={canHover ? { scale: 1.05, y: -4 } : undefined}
+      transition={{ type: "spring", stiffness: 420, damping: 30 }}
     >
       {children}
     </motion.div>

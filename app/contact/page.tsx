@@ -51,7 +51,7 @@ export default function ContactPage() {
       setMessage("Thanks — we will get back to you shortly.");
     } catch (err) {
       setStatus("error");
-      setMessage("Submission failed. Please email us directly at admin@arkautomationgroup.com");
+      setMessage("Submission failed. Please email us directly at Lucas@arkautomationgroup.com");
     }
   }
 

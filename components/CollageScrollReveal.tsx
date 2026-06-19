@@ -63,9 +63,18 @@ function CollagePanel({
     [0, 0.16, 0.66],
     reduced ? [1, 1, 1] : [0, 0.85, 1]
   );
+  const filter = useTransform(progress, (v) => {
+    if (reduced) return "blur(0px)";
+    const blurEnd = 0.68;
+    const blurPx = 12 * (1 - Math.min(v / blurEnd, 1));
+    return `blur(${blurPx}px)`;
+  });
 
   return (
-    <motion.div className="relative transform-gpu will-change-transform" style={{ x, y, opacity }}>
+    <motion.div
+      className="relative transform-gpu will-change-[transform,filter,opacity]"
+      style={{ x, y, opacity, filter }}
+    >
       <SafeImage
         src={img.src}
         alt={img.alt}
@@ -128,15 +137,10 @@ export default function CollageScrollReveal() {
     };
   }, [progress, reduced, syncProgress]);
 
-  const logoOpacity = useTransform(
-    progress,
-    [0.3, 0.72],
-    reduced ? [1, 1] : [0, 1]
-  );
   const logoScale = useTransform(
     progress,
     [0.3, 0.72],
-    reduced ? [1, 1] : [0.85, 1]
+    reduced ? [1, 1] : [0.92, 1]
   );
 
   return (
@@ -144,7 +148,7 @@ export default function CollageScrollReveal() {
       ref={containerRef}
       className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen"
     >
-      <div className="relative w-screen aspect-[1/1] md:aspect-[16/9] overflow-hidden">
+      <div className="relative w-screen aspect-[1/1] md:aspect-[16/9] overflow-hidden bg-neutral-300">
         <div className="absolute inset-0 px-[5px] py-0">
           <div className="grid grid-cols-2 grid-rows-2 gap-[5px] h-full">
             {COLLAGE_IMAGES.map((img, i) => (
@@ -159,15 +163,15 @@ export default function CollageScrollReveal() {
           </div>
         </div>
         <motion.div
-          className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 transform-gpu"
-          style={{ opacity: logoOpacity, scale: logoScale }}
+          className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 transform-gpu opacity-100"
+          style={{ scale: logoScale }}
         >
           <Image
             src="/ARK.svg"
             alt="ARK"
             width={390}
             height={180}
-            className="w-auto h-28 md:h-[216px] invert brightness-0 drop-shadow-[0_4px_16px_rgba(0,0,0,0.7)]"
+            className="w-auto h-28 md:h-[216px] invert brightness-0 drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)]"
           />
         </motion.div>
       </div>

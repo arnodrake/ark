@@ -104,7 +104,7 @@ export default function Home() {
         </div>
       </Section>
 
-      <Section id="capabilities" subdued padYClass="py-[5px]" className="bg-neutral-200 overflow-hidden">
+      <Section id="capabilities" padYClass="py-[5px]" className="bg-neutral-300 overflow-hidden text-neutral-900">
         <CollageScrollReveal />
       </Section>
 
@@ -119,7 +119,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-black/55" />
         </div>
         <ProjectFocusGrid className="relative z-10">
-          <ProjectFocusCard className="mb-10">
+          <ProjectFocusCard titleFocus className="mb-10">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight">
               Representative Projects
             </h2>
@@ -159,7 +159,11 @@ export default function Home() {
           ].map((p, i) => {
             const isSemi = p.t.includes("TSMC") && p.t.includes("ASML") && p.t.includes("TEL");
             return (
-              <ProjectFocusCard key={p.t} className="rounded-xl border border-neutral-200 bg-white/90 backdrop-blur-sm p-5 md:p-6 shadow-sm transition-transform duration-200 hover:scale-105">
+              <ProjectFocusCard
+                key={p.t}
+                interactive
+                className="rounded-xl border border-neutral-200 bg-white/90 backdrop-blur-sm p-5 md:p-6 shadow-sm hover:shadow-xl transition-shadow duration-200"
+              >
                 {isSemi ? (
                   <div className="mb-2 overflow-visible">
                     {/* Mobile: title與logos同一水平線（logos靠右，間距更緊） */}
@@ -216,7 +220,7 @@ export default function Home() {
       >
         <div className="max-w-3xl text-center sm:text-left">
           <div className="mt-6 flex flex-col sm:flex-row sm:flex-wrap gap-3 justify-center sm:justify-start">
-            <a href="mailto:admin@arkautomationgroup.com" className="inline-flex items-center justify-center rounded-md bg-white px-5 py-3 text-neutral-900 font-medium hover:bg-white/90">
+            <a href="mailto:Lucas@arkautomationgroup.com" className="inline-flex items-center justify-center rounded-md bg-white px-5 py-3 text-neutral-900 font-medium hover:bg-white/90">
               Email Us
             </a>
             <a href="/contact" className="inline-flex items-center justify-center rounded-md border border-white/30 px-5 py-3 text-white font-medium hover:bg-white/10">
