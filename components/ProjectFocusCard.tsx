@@ -69,56 +69,76 @@ function remapTitleFocus(v: number, isMobile: boolean): number {
 const FocusProgressContext = createContext<MotionValue<number> | null>(null);
 const FocusMobileContext = createContext(false);
 
-/** Mobile-only: viewport edge strips — only active while grid content occupies that band. */
-function ProjectFocusEdgeBlur({ top, bottom }: { top: boolean; bottom: boolean }) {
-  const stripStyle = {
-    height: `${MOBILE_EDGE * 100}dvh`,
-    backdropFilter: "blur(2.5px)",
-    WebkitBackdropFilter: "blur(2.5px)",
-    transition: "opacity 0.35s ease",
-  } as const;
+type EdgeBlurState = { top: number; bottom: number };
+
+/** Show edge blur only while grid content occupies the viewport's top/bottom 15%. */
+function computeEdgeBlurState(rect: DOMRect, vh: number): EdgeBlurState {
+  const topZone = vh * MOBILE_EDGE;
+  const bottomZoneStart = vh * (1 - MOBILE_EDGE);
+  const bottomZoneHeight = vh - bottomZoneStart;
+
+  if (rect.bottom <= 0 || rect.top >= vh) {
+    return { top: 0, bottom: 0 };
+  }
+
+  let top = 0;
+  let bottom = 0;
+
+  const topOverlap = Math.min(rect.bottom, topZone) - Math.max(rect.top, 0);
+  if (topOverlap > 0) {
+    top = Math.pow(Math.min(1, topOverlap / topZone), 0.9);
+  }
+
+  const bottomOverlap = Math.min(rect.bottom, vh) - Math.max(rect.top, bottomZoneStart);
+  if (bottomOverlap > 0) {
+    bottom = Math.pow(Math.min(1, bottomOverlap / bottomZoneHeight), 0.9);
+  }
+
+  return { top, bottom };
+}
+
+/** Mobile-only: viewport edge strips — opacity tracks grid overlap with each zone. */
+function ProjectFocusEdgeBlur({ top, bottom }: EdgeBlurState) {
+  const stripHeight = `${MOBILE_EDGE * 100}dvh`;
+
+  const stripBase = {
+    height: stripHeight,
+    transition: "opacity 0.2s ease-out",
+    pointerEvents: "none" as const,
+  };
 
   return (
     <>
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-x-0 top-0 z-30 md:hidden"
-        style={{
-          ...stripStyle,
-          opacity: top ? 1 : 0,
-          visibility: top ? "visible" : "hidden",
-          maskImage: "linear-gradient(to bottom, black 0%, transparent 88%)",
-          WebkitMaskImage: "linear-gradient(to bottom, black 0%, transparent 88%)",
-        }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-x-0 bottom-0 z-30 md:hidden"
-        style={{
-          ...stripStyle,
-          opacity: bottom ? 1 : 0,
-          visibility: bottom ? "visible" : "hidden",
-          maskImage: "linear-gradient(to top, black 0%, transparent 88%)",
-          WebkitMaskImage: "linear-gradient(to top, black 0%, transparent 88%)",
-        }}
-      />
+      {top > 0.02 ? (
+        <div
+          aria-hidden
+          className="fixed inset-x-0 top-0 z-30 md:hidden"
+          style={{
+            ...stripBase,
+            opacity: top,
+            backdropFilter: `blur(${2 + top * 2}px)`,
+            WebkitBackdropFilter: `blur(${2 + top * 2}px)`,
+            maskImage: "linear-gradient(to bottom, black 0%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to bottom, black 0%, transparent 100%)",
+          }}
+        />
+      ) : null}
+      {bottom > 0.02 ? (
+        <div
+          aria-hidden
+          className="fixed inset-x-0 bottom-0 z-30 md:hidden"
+          style={{
+            ...stripBase,
+            opacity: bottom,
+            backdropFilter: `blur(${2 + bottom * 2}px)`,
+            WebkitBackdropFilter: `blur(${2 + bottom * 2}px)`,
+            maskImage: "linear-gradient(to top, black 0%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to top, black 0%, transparent 100%)",
+          }}
+        />
+      ) : null}
     </>
   );
-}
-
-function computeEdgeBlurVisibility(rect: DOMRect, vh: number) {
-  const edge = vh * MOBILE_EDGE;
-  const topZoneEnd = edge;
-  const bottomZoneStart = vh - edge;
-
-  if (rect.bottom <= 0 || rect.top >= vh) {
-    return { top: false, bottom: false };
-  }
-
-  return {
-    top: rect.top < topZoneEnd,
-    bottom: rect.bottom > bottomZoneStart && rect.top < bottomZoneStart,
-  };
 }
 
 type ProjectFocusGridProps = {
@@ -131,16 +151,16 @@ export function ProjectFocusGrid({ children, className }: ProjectFocusGridProps)
   const reduced = useReducedMotion() ?? false;
   const isMobile = useIsMobile();
   const progress = useMotionValue(reduced ? 1 : 0);
-  const [edgeBlur, setEdgeBlur] = useState({ top: false, bottom: false });
+  const [edgeBlur, setEdgeBlur] = useState<EdgeBlurState>({ top: 0, bottom: 0 });
 
   const sync = useCallback(() => {
     const el = ref.current;
     if (!el || reduced) return;
     progress.set(computeFocusProgress(el, isMobile));
-
     if (isMobile) {
-      const rect = el.getBoundingClientRect();
-      setEdgeBlur(computeEdgeBlurVisibility(rect, window.innerHeight));
+      setEdgeBlur(computeEdgeBlurState(el.getBoundingClientRect(), window.innerHeight));
+    } else {
+      setEdgeBlur({ top: 0, bottom: 0 });
     }
   }, [progress, reduced, isMobile]);
 
@@ -168,9 +188,7 @@ export function ProjectFocusGrid({ children, className }: ProjectFocusGridProps)
         <div ref={ref} className={className}>
           {children}
         </div>
-        {!reduced && isMobile ? (
-          <ProjectFocusEdgeBlur top={edgeBlur.top} bottom={edgeBlur.bottom} />
-        ) : null}
+        {!reduced && isMobile ? <ProjectFocusEdgeBlur {...edgeBlur} /> : null}
       </FocusMobileContext.Provider>
     </FocusProgressContext.Provider>
   );
