@@ -69,60 +69,72 @@ function remapTitleFocus(v: number, isMobile: boolean): number {
 const FocusProgressContext = createContext<MotionValue<number> | null>(null);
 const FocusMobileContext = createContext(false);
 
+type EdgeBlurState = { top: number; bottom: number };
+
+function computeEdgeBlurState(el: HTMLElement): EdgeBlurState {
+  const rect = el.getBoundingClientRect();
+  const vh = window.innerHeight;
+  const zone = vh * MOBILE_EDGE;
+  const bottomZoneStart = vh - zone;
+
+  if (rect.bottom <= 0 || rect.top >= vh) {
+    return { top: 0, bottom: 0 };
+  }
+
+  let top = 0;
+  if (rect.top < zone) {
+    const depth = zone - rect.top;
+    top = Math.min(1, Math.max(0, depth / zone));
+  }
+
+  let bottom = 0;
+  if (rect.bottom > bottomZoneStart) {
+    const depth = rect.bottom - bottomZoneStart;
+    bottom = Math.min(1, Math.max(0, depth / zone));
+  }
+
+  return { top, bottom };
+}
+
 /** Mobile-only: fixed viewport strips blur content scrolling underneath (not whole cards). */
-function ProjectFocusEdgeBlur({
-  showTop,
-  showBottom,
-}: {
-  showTop: boolean;
-  showBottom: boolean;
-}) {
-  if (!showTop && !showBottom) return null;
+function ProjectFocusEdgeBlur({ top, bottom }: EdgeBlurState) {
+  if (top <= 0 && bottom <= 0) return null;
 
   const stripStyle = {
     height: `${MOBILE_EDGE * 100}dvh`,
     backdropFilter: "blur(3.5px)",
     WebkitBackdropFilter: "blur(3.5px)",
+    transition: "opacity 0.22s ease-out",
   } as const;
 
   return (
     <>
-      {showTop ? (
+      {top > 0 ? (
         <div
           aria-hidden
           className="pointer-events-none fixed inset-x-0 top-0 z-30 md:hidden"
           style={{
             ...stripStyle,
-            maskImage: "linear-gradient(to bottom, black 0%, black 50%, transparent 100%)",
-            WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 50%, transparent 100%)",
+            opacity: top,
+            maskImage: "linear-gradient(to bottom, black 0%, black 45%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 45%, transparent 100%)",
           }}
         />
       ) : null}
-      {showBottom ? (
+      {bottom > 0 ? (
         <div
           aria-hidden
           className="pointer-events-none fixed inset-x-0 bottom-0 z-30 md:hidden"
           style={{
             ...stripStyle,
-            maskImage: "linear-gradient(to top, black 0%, black 50%, transparent 100%)",
-            WebkitMaskImage: "linear-gradient(to top, black 0%, black 50%, transparent 100%)",
+            opacity: bottom,
+            maskImage: "linear-gradient(to top, black 0%, black 45%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to top, black 0%, black 45%, transparent 100%)",
           }}
         />
       ) : null}
     </>
   );
-}
-
-function computeEdgeBlurState(el: HTMLElement) {
-  const rect = el.getBoundingClientRect();
-  const vh = window.innerHeight;
-  const zone = vh * MOBILE_EDGE;
-
-  const inView = rect.bottom > 0 && rect.top < vh;
-  return {
-    top: inView && rect.top < zone,
-    bottom: inView && rect.bottom > vh - zone,
-  };
 }
 
 type ProjectFocusGridProps = {
@@ -135,7 +147,7 @@ export function ProjectFocusGrid({ children, className }: ProjectFocusGridProps)
   const reduced = useReducedMotion() ?? false;
   const isMobile = useIsMobile();
   const progress = useMotionValue(reduced ? 1 : 0);
-  const [edgeBlur, setEdgeBlur] = useState({ top: false, bottom: false });
+  const [edgeBlur, setEdgeBlur] = useState<EdgeBlurState>({ top: 0, bottom: 0 });
 
   const sync = useCallback(() => {
     const el = ref.current;
@@ -165,10 +177,10 @@ export function ProjectFocusGrid({ children, className }: ProjectFocusGridProps)
   }, [progress, reduced, sync]);
 
   useEffect(() => {
-    if (reduced || !isMobile) {
-      setEdgeBlur({ top: false, bottom: false });
+    if (!isMobile || reduced) {
+      setEdgeBlur({ top: 0, bottom: 0 });
     }
-  }, [reduced, isMobile]);
+  }, [isMobile, reduced]);
 
   return (
     <FocusProgressContext.Provider value={progress}>
@@ -176,9 +188,7 @@ export function ProjectFocusGrid({ children, className }: ProjectFocusGridProps)
         <div ref={ref} className={className}>
           {children}
         </div>
-        {!reduced && isMobile ? (
-          <ProjectFocusEdgeBlur showTop={edgeBlur.top} showBottom={edgeBlur.bottom} />
-        ) : null}
+        {!reduced && isMobile ? <ProjectFocusEdgeBlur top={edgeBlur.top} bottom={edgeBlur.bottom} /> : null}
       </FocusMobileContext.Provider>
     </FocusProgressContext.Provider>
   );
