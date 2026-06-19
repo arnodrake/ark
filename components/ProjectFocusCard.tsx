@@ -40,6 +40,18 @@ function getFocusCurve(isMobile: boolean) {
     : { peak: 0.26, blurReturnStart: 0.6 };
 }
 
+/** Mobile: per-card bell curve — center sharp, top/bottom edges blurred. */
+function computeCardFocusProgress(el: HTMLElement): number {
+  const rect = el.getBoundingClientRect();
+  const vh = window.innerHeight;
+  const cardCenter = rect.top + rect.height / 2;
+  const viewportCenter = vh * 0.48;
+  const falloff = vh * 0.44;
+  const dist = Math.abs(cardCenter - viewportCenter);
+  const t = Math.min(1, dist / falloff);
+  return 1 - Math.pow(t, 0.62);
+}
+
 /** Focus 0 = max blur, 1 = sharp. Peaks mid-scroll; blur returns when scrolling past. */
 function computeFocusProgress(el: HTMLElement, isMobile: boolean): number {
   const rect = el.getBoundingClientRect();
@@ -129,11 +141,39 @@ export default function ProjectFocusCard({
   interactive = false,
   titleFocus = false,
 }: ProjectFocusCardProps) {
-  const progress = useContext(FocusProgressContext);
+  const gridProgress = useContext(FocusProgressContext);
   const isMobile = useContext(FocusMobileContext);
   const reduced = useReducedMotion() ?? false;
+  const cardRef = useRef<HTMLDivElement>(null);
+  const cardProgress = useMotionValue(reduced ? 1 : 0);
   const fallback = useMotionValue(1);
-  const source = progress ?? fallback;
+  const usePerCardMobile = isMobile && !titleFocus;
+
+  const syncCard = useCallback(() => {
+    const el = cardRef.current;
+    if (!el || reduced || !usePerCardMobile) return;
+    cardProgress.set(computeCardFocusProgress(el));
+  }, [cardProgress, reduced, usePerCardMobile]);
+
+  useEffect(() => {
+    if (reduced || !usePerCardMobile) {
+      cardProgress.set(1);
+      return;
+    }
+
+    syncCard();
+    window.addEventListener("scroll", syncCard, { passive: true });
+    window.addEventListener("resize", syncCard, { passive: true });
+    window.addEventListener("touchmove", syncCard, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", syncCard);
+      window.removeEventListener("resize", syncCard);
+      window.removeEventListener("touchmove", syncCard);
+    };
+  }, [cardProgress, reduced, syncCard, usePerCardMobile]);
+
+  const source = usePerCardMobile ? cardProgress : gridProgress ?? fallback;
   const effective = useTransform(source, (v) => {
     const p = typeof v === "number" ? v : 0;
     return titleFocus ? remapTitleFocus(p, isMobile) : p;
@@ -150,7 +190,7 @@ export default function ProjectFocusCard({
     if (reduced) return "blur(0px)";
     const progress = typeof v === "number" ? v : 0;
     const hover = typeof h === "number" ? h : 0;
-    const max = isMobile ? 4 : 8;
+    const max = isMobile ? 5.5 : 8;
     const scrollBlur = max * (1 - progress);
     return `blur(${(scrollBlur * (1 - hover)).toFixed(2)}px)`;
   });
@@ -158,13 +198,14 @@ export default function ProjectFocusCard({
     if (reduced) return 1;
     const progress = typeof v === "number" ? v : 0;
     const hover = typeof h === "number" ? h : 0;
-    const min = isMobile ? 0.9 : 0.72;
+    const min = isMobile ? 0.86 : 0.72;
     const scrollOpacity = min + (1 - min) * progress;
     return scrollOpacity + (1 - scrollOpacity) * hover;
   });
 
   return (
     <motion.div
+      ref={cardRef}
       style={{ filter, opacity }}
       className={`transform-gpu will-change-[filter,opacity,transform] ${className ?? ""}`}
       onHoverStart={canHover ? () => hoverFocus.set(1) : undefined}
