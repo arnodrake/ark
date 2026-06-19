@@ -126,27 +126,30 @@ type ProjectFocusCardProps = {
 export function MobileViewportEdgeBlur({ sectionId = "projects" }: { sectionId?: string }) {
   const reduced = useReducedMotion() ?? false;
   const isMobile = useIsMobile();
-  const [showEdges, setShowEdges] = useState(false);
+  const [showTopBlur, setShowTopBlur] = useState(false);
+  const [showBottomBlur, setShowBottomBlur] = useState(false);
 
   useEffect(() => {
     if (!isMobile || reduced) {
-      setShowEdges(false);
+      setShowTopBlur(false);
+      setShowBottomBlur(false);
       return;
     }
 
-    const projectsEl = document.getElementById(sectionId);
-    if (!projectsEl) return;
+    const el = document.getElementById(sectionId);
+    if (!el) return;
 
     const sync = () => {
-      const vh = window.innerHeight;
-      const projectsRect = projectsEl.getBoundingClientRect();
-      const contactEl = document.getElementById("contact");
-      const contactTop = contactEl?.getBoundingClientRect().top ?? Infinity;
+      const rect = el.getBoundingClientRect();
+      const inSection = rect.top < window.innerHeight && rect.bottom > 0;
 
-      const projectsInView = projectsRect.top < vh && projectsRect.bottom > 0;
-      const contactReached = contactTop < vh;
+      const contact = document.getElementById("contact");
+      const contactVisible = contact
+        ? contact.getBoundingClientRect().top < window.innerHeight
+        : false;
 
-      setShowEdges(projectsInView && !contactReached);
+      setShowTopBlur(inSection);
+      setShowBottomBlur(inSection && !contactVisible);
     };
 
     sync();
@@ -161,29 +164,33 @@ export function MobileViewportEdgeBlur({ sectionId = "projects" }: { sectionId?:
     };
   }, [isMobile, reduced, sectionId]);
 
-  if (!isMobile || reduced || !showEdges) return null;
+  if (!isMobile || reduced) return null;
 
   const edgeClass =
     "pointer-events-none fixed inset-x-0 z-[25] h-[14dvh] md:hidden backdrop-blur-md";
 
   return (
     <>
-      <div
-        aria-hidden
-        className={`${edgeClass} top-0`}
-        style={{
-          maskImage: "linear-gradient(to bottom, black 20%, transparent 100%)",
-          WebkitMaskImage: "linear-gradient(to bottom, black 20%, transparent 100%)",
-        }}
-      />
-      <div
-        aria-hidden
-        className={`${edgeClass} bottom-0`}
-        style={{
-          maskImage: "linear-gradient(to top, black 20%, transparent 100%)",
-          WebkitMaskImage: "linear-gradient(to top, black 20%, transparent 100%)",
-        }}
-      />
+      {showTopBlur ? (
+        <div
+          aria-hidden
+          className={`${edgeClass} top-0`}
+          style={{
+            maskImage: "linear-gradient(to bottom, black 20%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to bottom, black 20%, transparent 100%)",
+          }}
+        />
+      ) : null}
+      {showBottomBlur ? (
+        <div
+          aria-hidden
+          className={`${edgeClass} bottom-0`}
+          style={{
+            maskImage: "linear-gradient(to top, black 20%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to top, black 20%, transparent 100%)",
+          }}
+        />
+      ) : null}
     </>
   );
 }
