@@ -70,8 +70,14 @@ const FocusProgressContext = createContext<MotionValue<number> | null>(null);
 const FocusMobileContext = createContext(false);
 
 /** Mobile-only: fixed viewport strips blur content scrolling underneath (not whole cards). */
-function ProjectFocusEdgeBlur({ active }: { active: boolean }) {
-  if (!active) return null;
+function ProjectFocusEdgeBlur({
+  showTop,
+  showBottom,
+}: {
+  showTop: boolean;
+  showBottom: boolean;
+}) {
+  if (!showTop && !showBottom) return null;
 
   const stripStyle = {
     height: `${MOBILE_EDGE * 100}dvh`,
@@ -81,26 +87,42 @@ function ProjectFocusEdgeBlur({ active }: { active: boolean }) {
 
   return (
     <>
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-x-0 top-0 z-30 md:hidden"
-        style={{
-          ...stripStyle,
-          maskImage: "linear-gradient(to bottom, black 0%, black 50%, transparent 100%)",
-          WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 50%, transparent 100%)",
-        }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-x-0 bottom-0 z-30 md:hidden"
-        style={{
-          ...stripStyle,
-          maskImage: "linear-gradient(to top, black 0%, black 50%, transparent 100%)",
-          WebkitMaskImage: "linear-gradient(to top, black 0%, black 50%, transparent 100%)",
-        }}
-      />
+      {showTop ? (
+        <div
+          aria-hidden
+          className="pointer-events-none fixed inset-x-0 top-0 z-30 md:hidden"
+          style={{
+            ...stripStyle,
+            maskImage: "linear-gradient(to bottom, black 0%, black 50%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 50%, transparent 100%)",
+          }}
+        />
+      ) : null}
+      {showBottom ? (
+        <div
+          aria-hidden
+          className="pointer-events-none fixed inset-x-0 bottom-0 z-30 md:hidden"
+          style={{
+            ...stripStyle,
+            maskImage: "linear-gradient(to top, black 0%, black 50%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to top, black 0%, black 50%, transparent 100%)",
+          }}
+        />
+      ) : null}
     </>
   );
+}
+
+function computeEdgeBlurState(el: HTMLElement) {
+  const rect = el.getBoundingClientRect();
+  const vh = window.innerHeight;
+  const zone = vh * MOBILE_EDGE;
+
+  const inView = rect.bottom > 0 && rect.top < vh;
+  return {
+    top: inView && rect.top < zone,
+    bottom: inView && rect.bottom > vh - zone,
+  };
 }
 
 type ProjectFocusGridProps = {
@@ -113,12 +135,15 @@ export function ProjectFocusGrid({ children, className }: ProjectFocusGridProps)
   const reduced = useReducedMotion() ?? false;
   const isMobile = useIsMobile();
   const progress = useMotionValue(reduced ? 1 : 0);
-  const [edgeBlurActive, setEdgeBlurActive] = useState(false);
+  const [edgeBlur, setEdgeBlur] = useState({ top: false, bottom: false });
 
   const sync = useCallback(() => {
     const el = ref.current;
     if (!el || reduced) return;
     progress.set(computeFocusProgress(el, isMobile));
+    if (isMobile) {
+      setEdgeBlur(computeEdgeBlurState(el));
+    }
   }, [progress, reduced, isMobile]);
 
   useEffect(() => {
@@ -140,18 +165,9 @@ export function ProjectFocusGrid({ children, className }: ProjectFocusGridProps)
   }, [progress, reduced, sync]);
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el || reduced || !isMobile) {
-      setEdgeBlurActive(false);
-      return;
+    if (reduced || !isMobile) {
+      setEdgeBlur({ top: false, bottom: false });
     }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => setEdgeBlurActive(entry.isIntersecting),
-      { threshold: 0 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
   }, [reduced, isMobile]);
 
   return (
@@ -160,7 +176,9 @@ export function ProjectFocusGrid({ children, className }: ProjectFocusGridProps)
         <div ref={ref} className={className}>
           {children}
         </div>
-        {!reduced && isMobile ? <ProjectFocusEdgeBlur active={edgeBlurActive} /> : null}
+        {!reduced && isMobile ? (
+          <ProjectFocusEdgeBlur showTop={edgeBlur.top} showBottom={edgeBlur.bottom} />
+        ) : null}
       </FocusMobileContext.Provider>
     </FocusProgressContext.Provider>
   );
