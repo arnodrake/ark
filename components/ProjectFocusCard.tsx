@@ -68,37 +68,37 @@ function remapTitleFocus(v: number, isMobile: boolean): number {
 const FocusProgressContext = createContext<MotionValue<number> | null>(null);
 const FocusMobileContext = createContext(false);
 
-const edgeBlurMask = {
-  top: "linear-gradient(to bottom, black 70%, transparent 100%)",
-  bottom: "linear-gradient(to top, black 70%, transparent 100%)",
-} as const;
+const EDGE_MASK_TOP =
+  "linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.45) 45%, transparent 100%)";
+const EDGE_MASK_BOTTOM =
+  "linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.45) 45%, transparent 100%)";
 
-function MobileViewportEdgeBlur({ active }: { active: boolean }) {
-  if (!active) return null;
+/** Mobile-only: fixed viewport edge bands — blur 15% top/bottom, not whole cards. */
+function ProjectFocusEdgeBlur({ position }: { position: "top" | "bottom" }) {
+  const isMobile = useIsMobile();
+  const reduced = useReducedMotion() ?? false;
+
+  if (!isMobile || reduced) return null;
+
+  const isTop = position === "top";
 
   return (
-    <>
+    <div
+      aria-hidden
+      className={`pointer-events-none sticky z-20 h-[15dvh] w-full md:hidden ${
+        isTop ? "top-0 -mb-[15dvh]" : "bottom-0 -mt-[15dvh]"
+      }`}
+    >
       <div
-        aria-hidden
-        className="pointer-events-none fixed inset-x-0 top-0 z-[25] h-[15dvh] md:hidden"
+        className="h-full w-full"
         style={{
-          backdropFilter: "blur(6px)",
-          WebkitBackdropFilter: "blur(6px)",
-          maskImage: edgeBlurMask.top,
-          WebkitMaskImage: edgeBlurMask.top,
+          backdropFilter: "blur(3px)",
+          WebkitBackdropFilter: "blur(3px)",
+          maskImage: isTop ? EDGE_MASK_TOP : EDGE_MASK_BOTTOM,
+          WebkitMaskImage: isTop ? EDGE_MASK_TOP : EDGE_MASK_BOTTOM,
         }}
       />
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-x-0 bottom-0 z-[25] h-[15dvh] md:hidden"
-        style={{
-          backdropFilter: "blur(6px)",
-          WebkitBackdropFilter: "blur(6px)",
-          maskImage: edgeBlurMask.bottom,
-          WebkitMaskImage: edgeBlurMask.bottom,
-        }}
-      />
-    </>
+    </div>
   );
 }
 
@@ -112,16 +112,15 @@ export function ProjectFocusGrid({ children, className }: ProjectFocusGridProps)
   const reduced = useReducedMotion() ?? false;
   const isMobile = useIsMobile();
   const progress = useMotionValue(reduced ? 1 : 0);
-  const [edgeBlurActive, setEdgeBlurActive] = useState(false);
 
   const sync = useCallback(() => {
     const el = ref.current;
-    if (!el || reduced) return;
-    progress.set(computeFocusProgress(el, isMobile));
+    if (!el || reduced || isMobile) return;
+    progress.set(computeFocusProgress(el, false));
   }, [progress, reduced, isMobile]);
 
   useEffect(() => {
-    if (reduced) {
+    if (reduced || isMobile) {
       progress.set(1);
       return;
     }
@@ -129,38 +128,20 @@ export function ProjectFocusGrid({ children, className }: ProjectFocusGridProps)
     sync();
     window.addEventListener("scroll", sync, { passive: true });
     window.addEventListener("resize", sync, { passive: true });
-    window.addEventListener("touchmove", sync, { passive: true });
 
     return () => {
       window.removeEventListener("scroll", sync);
       window.removeEventListener("resize", sync);
-      window.removeEventListener("touchmove", sync);
     };
-  }, [progress, reduced, sync]);
-
-  useEffect(() => {
-    if (!isMobile || reduced) {
-      setEdgeBlurActive(false);
-      return;
-    }
-
-    const el = ref.current;
-    if (!el) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => setEdgeBlurActive(entry.isIntersecting),
-      { threshold: 0 },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [isMobile, reduced]);
+  }, [progress, reduced, isMobile, sync]);
 
   return (
     <FocusProgressContext.Provider value={progress}>
       <FocusMobileContext.Provider value={isMobile}>
         <div ref={ref} className={className}>
-          <MobileViewportEdgeBlur active={edgeBlurActive} />
+          <ProjectFocusEdgeBlur position="top" />
           {children}
+          <ProjectFocusEdgeBlur position="bottom" />
         </div>
       </FocusMobileContext.Provider>
     </FocusProgressContext.Provider>
@@ -186,14 +167,12 @@ export default function ProjectFocusCard({
   const isMobile = useContext(FocusMobileContext);
   const reduced = useReducedMotion() ?? false;
   const fallback = useMotionValue(1);
-  const source = !isMobile ? gridProgress ?? fallback : fallback;
-
+  const source = gridProgress ?? fallback;
   const effective = useTransform(source, (v) => {
-    if (isMobile) return 1;
     const p = typeof v === "number" ? v : 0;
-    return titleFocus ? remapTitleFocus(p, false) : p;
+    if (titleFocus && !isMobile) return remapTitleFocus(p, isMobile);
+    return p;
   });
-
   const hoverFocus = useMotionValue(0);
   const hoverFocusSpring = useSpring(hoverFocus, {
     stiffness: 520,
@@ -206,10 +185,9 @@ export default function ProjectFocusCard({
     if (reduced || isMobile) return "blur(0px)";
     const progress = typeof v === "number" ? v : 0;
     const hover = typeof h === "number" ? h : 0;
-    const scrollBlur = 8 * Math.pow(1 - progress, 1.35);
+    const scrollBlur = 8 * (1 - progress);
     return `blur(${(scrollBlur * (1 - hover)).toFixed(2)}px)`;
   });
-
   const opacity = useTransform([effective, hoverFocusSpring], ([v, h]) => {
     if (reduced || isMobile) return 1;
     const progress = typeof v === "number" ? v : 0;
