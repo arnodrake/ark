@@ -167,7 +167,7 @@ export function MobileViewportEdgeBlur({ sectionId = "projects" }: { sectionId?:
   if (!isMobile || reduced) return null;
 
   const edgeClass =
-    "pointer-events-none fixed inset-x-0 z-[25] h-[14dvh] md:hidden backdrop-blur-md";
+    "pointer-events-none fixed inset-x-0 z-[25] h-[10dvh] md:hidden backdrop-blur-md";
 
   return (
     <>
@@ -176,8 +176,8 @@ export function MobileViewportEdgeBlur({ sectionId = "projects" }: { sectionId?:
           aria-hidden
           className={`${edgeClass} top-0`}
           style={{
-            maskImage: "linear-gradient(to bottom, black 20%, transparent 100%)",
-            WebkitMaskImage: "linear-gradient(to bottom, black 20%, transparent 100%)",
+            maskImage: "linear-gradient(to bottom, black 15%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to bottom, black 15%, transparent 100%)",
           }}
         />
       ) : null}
@@ -186,8 +186,8 @@ export function MobileViewportEdgeBlur({ sectionId = "projects" }: { sectionId?:
           aria-hidden
           className={`${edgeClass} bottom-0`}
           style={{
-            maskImage: "linear-gradient(to top, black 20%, transparent 100%)",
-            WebkitMaskImage: "linear-gradient(to top, black 20%, transparent 100%)",
+            maskImage: "linear-gradient(to top, black 15%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to top, black 15%, transparent 100%)",
           }}
         />
       ) : null}
