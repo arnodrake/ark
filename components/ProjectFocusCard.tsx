@@ -167,7 +167,7 @@ export function MobileViewportEdgeBlur({ sectionId = "projects" }: { sectionId?:
   if (!isMobile || reduced) return null;
 
   const edgeClass =
-    "pointer-events-none fixed inset-x-0 z-[25] h-[10dvh] md:hidden backdrop-blur-md";
+    "pointer-events-none fixed inset-x-0 z-[25] h-[8dvh] md:hidden backdrop-blur-md";
 
   return (
     <>
