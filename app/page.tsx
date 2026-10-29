@@ -168,7 +168,7 @@ export default function Home() {
         dark
         padYClass="py-20 md:py-24"
         title={
-          <span className="font-display uppercase block text-[36px] md:text-[54px] lg:text-[64px] leading-[1.25]">
+          <span className="font-display font-normal tracking-[-0.01em] [-webkit-text-stroke:0.01em_currentColor] uppercase block text-[36px] md:text-[54px] lg:text-[64px] leading-[1.25]">
             {t.contactLines.map((line) => (
               <span key={line} className="block">{line}</span>
             ))}
