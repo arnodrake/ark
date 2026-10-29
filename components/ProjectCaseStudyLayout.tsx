@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import SectionLink from "@/components/SectionLink";
 import SiteFooter from "@/components/SiteFooter";
 import { ReactNode } from "react";
 import { format } from "@/lib/i18n/config";
@@ -196,13 +197,13 @@ export default async function ProjectCaseStudyLayout({
       <main className="min-h-screen pt-16 bg-neutral-950 text-white">
         <div className="mx-auto max-w-5xl px-4 sm:px-5 md:px-6">
           <header className="pt-6 sm:pt-8 md:pt-10 pb-8 md:pb-12 border-b border-white/[0.08]">
-            <Link
-              href="/#recent-projects"
+            <SectionLink
+              section="recent-projects"
               className="inline-flex items-center gap-1.5 text-sm font-medium text-white/55 transition hover:text-white -ml-0.5"
             >
               <span aria-hidden>←</span>
               {dict.caseStudy.back}
-            </Link>
+            </SectionLink>
             <p className="mt-4 sm:mt-6 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-400">
               {dict.caseStudy.label}
             </p>

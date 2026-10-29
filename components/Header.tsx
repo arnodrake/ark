@@ -6,16 +6,14 @@ import Image from "next/image";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { MouseEvent as ReactMouseEvent, ReactNode } from "react";
 import { usePathname } from "next/navigation";
-import { scrollToHash } from "@/lib/scroll-to-hash";
+import { useGoToSection } from "@/components/SectionLink";
 import LanguageSwitcher, { MobileLanguageList } from "@/components/LanguageSwitcher";
 import { useI18n, type ClientDictionary } from "@/components/I18nProvider";
 import type { CapabilitySlug } from "@/lib/i18n/types";
 
-type MenuItem = {
-  label: string;
-  href?: string;
-  children?: { label: string; href: string }[];
-};
+/** `section` items scroll to a home-page section instead of navigating to `href`. */
+type NavLink = { label: string; href: string; section?: string };
+type MenuItem = NavLink & { children?: NavLink[] };
 
 const CAPABILITY_SLUGS: CapabilitySlug[] = [
   "electrical-systems",
@@ -28,15 +26,17 @@ function buildNav(dict: ClientDictionary): MenuItem[] {
   return [
     {
       label: dict.nav.about,
-      href: "/#about",
+      href: "/",
+      section: "top",
       children: [
-        { label: dict.nav.representativeProjects, href: "/#projects" },
-        { label: dict.nav.ourMission, href: "/#future" },
+        { label: dict.nav.representativeProjects, href: "/", section: "projects" },
+        { label: dict.nav.ourMission, href: "/", section: "future" },
       ],
     },
     {
       label: dict.nav.businesses,
-      href: "/#capabilities",
+      href: "/",
+      section: "capabilities",
       children: CAPABILITY_SLUGS.map((slug) => ({ label: dict.capabilityNames[slug], href: `/capabilities/${slug}` })),
     },
     { label: dict.nav.contact, href: "/contact" },
@@ -131,21 +131,17 @@ export default function Header() {
     setCloseTimer(t);
   };
 
-  const handleHashNav = (e: ReactMouseEvent<HTMLAnchorElement>, href: string, closeMobile = false) => {
-    const hash = href.includes("#") ? href.slice(href.indexOf("#")) : "";
-    if (!hash || pathname !== "/") return;
-
-    if (hash === "#future" && window.matchMedia("(min-width: 768px)").matches) {
-      e.preventDefault();
-      window.history.pushState(null, "", href);
-      scrollToHash(hash, true);
-      setOpenIdx(null);
-      setActiveIdx(null);
-      setPanelHover(false);
-      if (closeMobile) {
-        setMobileClosing(true);
-        setMobileOpen(false);
-      }
+  const goToSection = useGoToSection();
+  const handleNavClick = (e: ReactMouseEvent<HTMLAnchorElement>, link: NavLink, closeMobile = false) => {
+    if (!link.section || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+    e.preventDefault();
+    goToSection(link.section);
+    setOpenIdx(null);
+    setActiveIdx(null);
+    setPanelHover(false);
+    if (closeMobile) {
+      setMobileClosing(true);
+      setMobileOpen(false);
     }
   };
 
@@ -271,7 +267,8 @@ export default function Header() {
                 onMouseLeave={() => { setContactHover(false); }}
               >
                 <Link
-                  href={item.href ?? "#"}
+                  href={item.href}
+                  onClick={(e) => handleNavClick(e, item)}
                   role="menuitem"
                   aria-haspopup={!!item.children}
                   aria-expanded={!!item.children && (effectiveIdx === idx && expanded) ? true : false}
@@ -411,12 +408,12 @@ export default function Header() {
                       >
                       <Link
                         key={c.label}
-                        href={c.href ?? "#"}
+                        href={c.href}
                         role="menuitem"
                         className="block px-3 py-1.5 text-lg md:text-xl font-medium tracking-tight text-white/75 transition-colors hover:text-white"
                         autoFocus={ci === 0}
                         onKeyDown={(e) => { if (e.key === "Escape") { setOpenIdx(null); setActiveIdx(null); } }}
-                        onClick={(e) => handleHashNav(e, c.href ?? "#")}
+                        onClick={(e) => handleNavClick(e, c)}
                       >
                         {c.label}
                       </Link>
@@ -474,18 +471,11 @@ export default function Header() {
               {mobileSection === "about" && (
                 <div className="space-y-2">
                   <div className="mt-1 grid">
-                    <Link href="/#projects" className="py-2 text-xl" onClick={() => { setMobileClosing(true); setMobileOpen(false); }}>{dict.nav.representativeProjects}</Link>
-                    <Link
-                      href="/#future"
-                      className="py-2 text-xl"
-                      onClick={(e) => {
-                        handleHashNav(e, "/#future", true);
-                        setMobileClosing(true);
-                        setMobileOpen(false);
-                      }}
-                    >
-                      {dict.nav.ourMission}
-                    </Link>
+                    {NAV[0].children?.map((c) => (
+                      <Link key={c.label} href={c.href} className="py-2 text-xl" onClick={(e) => handleNavClick(e, c, true)}>
+                        {c.label}
+                      </Link>
+                    ))}
                   </div>
                 </div>
               )}

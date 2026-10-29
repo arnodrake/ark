@@ -2,23 +2,21 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { scrollToHash } from "@/lib/scroll-to-hash";
+import { PENDING_SECTION_KEY, scrollToSection } from "@/lib/scroll-to-hash";
 
+/** Finishes a cross-page SectionLink jump and strips any #hash so the URL stays clean. */
 export default function HashScroll() {
   const pathname = usePathname();
 
   useEffect(() => {
-    const run = () => {
-      const hash = window.location.hash;
-      if (!hash) return;
-      requestAnimationFrame(() => {
-        scrollToHash(hash, false);
-      });
-    };
-
-    run();
-    window.addEventListener("hashchange", run);
-    return () => window.removeEventListener("hashchange", run);
+    if (window.location.hash) {
+      window.history.replaceState(window.history.state, "", window.location.pathname + window.location.search);
+    }
+    if (pathname !== "/") return;
+    const section = sessionStorage.getItem(PENDING_SECTION_KEY);
+    if (!section) return;
+    sessionStorage.removeItem(PENDING_SECTION_KEY);
+    requestAnimationFrame(() => requestAnimationFrame(() => scrollToSection(section, false)));
   }, [pathname]);
 
   return null;
