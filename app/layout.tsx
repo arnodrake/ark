@@ -8,7 +8,7 @@ import { fontVariables } from "@/lib/fonts";
 import { LANGUAGE_META } from "@/lib/i18n/config";
 import { getI18n } from "@/lib/i18n/server";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://arkautomationgroup.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.arkautomationgroup.com";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { dict } = await getI18n();
