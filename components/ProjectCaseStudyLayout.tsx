@@ -20,7 +20,7 @@ export type ProjectCaseStudyLayoutProps = {
 export async function caseStudyMetadata(slug: ProjectSlug) {
   const { dict } = await getI18n();
   const project = dict.caseStudy.projects[slug];
-  return { title: `${project.title} — Ark Automation`, description: project.subtitle };
+  return { title: `${project.title} — Ark Automation Inc.`, description: project.subtitle };
 }
 
 const proseClass =

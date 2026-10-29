@@ -9,11 +9,13 @@ import { LANGUAGE_META } from "@/lib/i18n/config";
 import { getI18n } from "@/lib/i18n/server";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.arkautomationgroup.com";
+const SITE_NAME = "Ark Automation Inc.";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { dict } = await getI18n();
   return {
     metadataBase: new URL(SITE_URL),
+    applicationName: SITE_NAME,
     title: dict.meta.title,
     description: dict.meta.description,
     icons: {
@@ -22,6 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
       shortcut: "/ARK.svg",
     },
     openGraph: {
+      siteName: SITE_NAME,
       title: dict.meta.title,
       description: dict.meta.description,
       type: "website",
@@ -69,10 +72,26 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
-              "@type": "Organization",
-              name: "Ark Automation Inc.",
-              url: SITE_URL,
-              logo: `${SITE_URL}/ARK.svg`,
+              "@graph": [
+                {
+                  "@type": "WebSite",
+                  "@id": `${SITE_URL}/#website`,
+                  name: SITE_NAME,
+                  alternateName: ["Ark Automation", "ARK Automation Inc."],
+                  url: `${SITE_URL}/`,
+                  publisher: { "@id": `${SITE_URL}/#organization` },
+                },
+                {
+                  "@type": "Organization",
+                  "@id": `${SITE_URL}/#organization`,
+                  name: SITE_NAME,
+                  legalName: SITE_NAME,
+                  alternateName: "Ark Automation",
+                  url: `${SITE_URL}/`,
+                  logo: `${SITE_URL}/ARK.svg`,
+                  email: "info@arkautomationgroup.com",
+                },
+              ],
             }),
           }}
         />

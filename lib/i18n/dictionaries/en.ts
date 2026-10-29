@@ -2,7 +2,7 @@ import type { Dictionary } from "../types";
 
 const en: Dictionary = {
   meta: {
-    title: "Ark Automation — Built for the Future",
+    title: "Ark Automation Inc. — Built for the Future",
     description: "Industrial electrical, network, and automation integration across the U.S.",
   },
   nav: {

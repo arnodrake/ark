@@ -2,7 +2,7 @@ import type { Dictionary } from "../types";
 
 const zh: Dictionary = {
   meta: {
-    title: "Ark Automation — 构筑未来",
+    title: "Ark Automation Inc. — 构筑未来",
     description: "工业电气、网络与自动化集成服务，业务覆盖全美。",
   },
   nav: {

@@ -16,7 +16,7 @@ export type { CapabilitySlug };
 export async function capabilityMetadata(slug: CapabilitySlug) {
   const { dict } = await getI18n();
   return {
-    title: `${dict.capabilityNames[slug].replace(/\u00AD/g, "")} — Ark Automation`,
+    title: `${dict.capabilityNames[slug].replace(/\u00AD/g, "")} — Ark Automation Inc.`,
     description: dict.capabilities.pages[slug].intro,
   };
 }
