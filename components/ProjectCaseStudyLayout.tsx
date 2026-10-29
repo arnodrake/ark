@@ -1,28 +1,37 @@
 import Image from "next/image";
 import Link from "next/link";
-import Header from "@/components/Header";
 import SiteFooter from "@/components/SiteFooter";
-import { PropsWithChildren, ReactNode } from "react";
+import { ReactNode } from "react";
+import { format } from "@/lib/i18n/config";
+import { getI18n } from "@/lib/i18n/server";
+import type { ProjectSlug } from "@/lib/i18n/types";
 
-export type ProjectCaseStudyLayoutProps = PropsWithChildren<{
-  title: string;
-  subtitle: string;
-  location: string;
+/** Images keyed by section index; sections without an entry render as text only. */
+export type CaseStudyMedia = Record<number, { src: string; position?: string; imageFirst?: boolean }>;
+
+export type ProjectCaseStudyLayoutProps = {
+  slug: ProjectSlug;
   year: string;
-  readTime: string;
+  readMinutes: number;
   heroSrc: string;
-  heroAlt: string;
-}>;
+  media: CaseStudyMedia;
+};
+
+export async function caseStudyMetadata(slug: ProjectSlug) {
+  const { dict } = await getI18n();
+  const project = dict.caseStudy.projects[slug];
+  return { title: `${project.title} — Ark Automation`, description: project.subtitle };
+}
 
 const proseClass =
-  "text-[14px] md:text-[17px] leading-[1.65] md:leading-[1.68] text-white/70 [&>p]:m-0 [&>p+p]:mt-2.5 md:[&>p+p]:mt-3";
+  "text-base md:text-[17px] leading-[1.75] text-white/70 [&>p]:m-0 [&>p+p]:mt-5";
 
 /** Bottom border keeps all content (incl. images) above the divider. */
-const sectionShell = "py-5 md:py-9 border-b border-white/[0.08] last:border-b-0";
+const sectionShell = "py-12 md:py-20 border-b border-white/[0.08] last:border-b-0";
 
 function SectionHeading({ title }: { title: string }) {
   return (
-    <h2 className="text-base md:text-[1.375rem] font-semibold tracking-tight text-white leading-snug">
+    <h2 className="text-[1.75rem] md:text-4xl lg:text-[2.75rem] font-semibold tracking-tight text-white leading-[1.12] max-w-3xl">
       {title}
     </h2>
   );
@@ -47,7 +56,7 @@ function MediaFigure({
           : "";
 
   return (
-    <figure className="relative aspect-[16/10] md:aspect-[3/2] w-full overflow-hidden rounded-lg md:rounded-xl ring-1 ring-white/10 bg-neutral-900">
+    <figure className="relative aspect-[16/10] md:aspect-[3/2] w-full overflow-hidden bg-neutral-900">
       <Image
         src={src}
         alt={alt}
@@ -75,9 +84,9 @@ export function ProjectSection({
   return (
     <section className={`${sectionShell} ${className ?? ""}`}>
       <SectionHeading title={title} />
-      <div className={`mt-3 md:mt-4 max-w-3xl ${proseClass}`}>{children}</div>
+      <div className={`mt-6 md:mt-8 max-w-[68ch] ${proseClass}`}>{children}</div>
       {media ? (
-        <ProjectFigure className="mt-4 md:mt-6 max-w-4xl" src={media.src} alt={media.alt} />
+        <ProjectFigure className="mt-8 md:mt-12" src={media.src} alt={media.alt} />
       ) : null}
     </section>
   );
@@ -108,7 +117,7 @@ export function ProjectMediaSection({
   return (
     <section className={sectionShell}>
       <SectionHeading title={title} />
-      <div className="mt-3 md:mt-4 grid gap-4 md:gap-8 md:grid-cols-2 md:items-start">
+      <div className="mt-6 md:mt-10 grid gap-6 md:gap-12 md:grid-cols-2 md:items-start">
         <div className={figureOrder}>{figure}</div>
         <div className={textOrder}>{text}</div>
       </div>
@@ -158,7 +167,7 @@ export function ProjectFigure({
 
   return (
     <figure
-      className={`relative ${aspectClass} overflow-hidden rounded-lg md:rounded-xl ring-1 ring-white/10 bg-neutral-900 ${className ?? ""}`}
+      className={`relative ${aspectClass} overflow-hidden bg-neutral-900 ${className ?? ""}`}
     >
       <Image
         src={src}
@@ -171,39 +180,39 @@ export function ProjectFigure({
   );
 }
 
-export default function ProjectCaseStudyLayout({
-  title,
-  subtitle,
-  location,
+export default async function ProjectCaseStudyLayout({
+  slug,
   year,
-  readTime,
+  readMinutes,
   heroSrc,
-  heroAlt,
-  children,
+  media,
 }: ProjectCaseStudyLayoutProps) {
+  const { dict } = await getI18n();
+  const { title, subtitle, location, heroAlt, sections } = dict.caseStudy.projects[slug];
+  const readTime = format(dict.caseStudy.readTime, { n: readMinutes });
+
   return (
     <>
-      <Header />
       <main className="min-h-screen pt-16 bg-neutral-950 text-white">
         <div className="mx-auto max-w-5xl px-4 sm:px-5 md:px-6">
-          <header className="pt-5 sm:pt-8 md:pt-10 pb-5 sm:pb-7 md:pb-9 border-b border-white/[0.08]">
+          <header className="pt-6 sm:pt-8 md:pt-10 pb-8 md:pb-12 border-b border-white/[0.08]">
             <Link
               href="/#recent-projects"
               className="inline-flex items-center gap-1.5 text-sm font-medium text-white/55 transition hover:text-white -ml-0.5"
             >
               <span aria-hidden>←</span>
-              Return
+              {dict.caseStudy.back}
             </Link>
-            <p className="mt-4 sm:mt-6 text-[11px] sm:text-xs font-semibold uppercase tracking-[0.14em] text-emerald-400">
-              Case Study
+            <p className="mt-4 sm:mt-6 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-400">
+              {dict.caseStudy.label}
             </p>
-            <h1 className="mt-2 text-[1.375rem] sm:text-[1.625rem] md:text-[2.25rem] lg:text-[2.625rem] font-semibold tracking-tight leading-[1.22] md:leading-[1.18] max-w-4xl">
+            <h1 className="mt-3 text-[2rem] sm:text-5xl lg:text-[3.75rem] font-semibold tracking-tight leading-[1.08] max-w-4xl">
               {title}
             </h1>
-            <p className="mt-2.5 sm:mt-3.5 text-[14px] sm:text-[15px] md:text-lg text-white/65 max-w-3xl leading-relaxed">
+            <p className="mt-4 md:mt-5 text-lg md:text-xl text-white/65 max-w-3xl leading-[1.6]">
               {subtitle}
             </p>
-            <div className="mt-3 sm:mt-4 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs sm:text-sm text-white/45">
+            <div className="mt-4 md:mt-5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-white/45">
               <span>{location}</span>
               <span aria-hidden>·</span>
               <span>{year}</span>
@@ -211,7 +220,7 @@ export default function ProjectCaseStudyLayout({
               <span>{readTime}</span>
             </div>
 
-            <figure className="relative mt-4 sm:mt-6 md:mt-7 aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden rounded-lg md:rounded-2xl ring-1 ring-white/10">
+            <figure className="relative mt-6 md:mt-10 aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden bg-neutral-900">
               <Image
                 src={heroSrc}
                 alt={heroAlt}
@@ -223,17 +232,38 @@ export default function ProjectCaseStudyLayout({
             </figure>
           </header>
 
-          <article>{children}</article>
+          <article>
+            {sections.map((section, i) => {
+              const paragraphs = section.paragraphs.map((p) => <p key={p}>{p}</p>);
+              const m = media[i];
+              return m ? (
+                <ProjectMediaSection
+                  key={section.title}
+                  title={section.title}
+                  imageSrc={m.src}
+                  imageAlt={section.imageAlt ?? section.title}
+                  imageFirst={m.imageFirst}
+                  imagePosition={m.position}
+                >
+                  {paragraphs}
+                </ProjectMediaSection>
+              ) : (
+                <ProjectSection key={section.title} title={section.title}>
+                  {paragraphs}
+                </ProjectSection>
+              );
+            })}
+          </article>
 
-          <div className="py-5 sm:py-7 md:py-9 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-            <p className="text-[14px] sm:text-[15px] md:text-base text-white/55 text-center sm:text-left">
-              Interested in a similar project?
+          <div className="py-8 md:py-12 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+            <p className="text-lg font-semibold text-white">
+              {dict.cta.planning}
             </p>
             <Link
               href="/contact"
-              className="inline-flex w-full sm:w-auto items-center justify-center rounded-md border border-white/20 bg-white px-5 py-2.5 text-sm font-medium text-neutral-950 transition hover:bg-white/90"
+              className="inline-flex w-full sm:w-auto items-center justify-center rounded-md border border-white/20 bg-white px-6 py-3 text-[15px] font-medium text-neutral-950 transition hover:bg-white/90"
             >
-              Get in touch
+              {dict.cta.getInTouch}
             </Link>
           </div>
         </div>

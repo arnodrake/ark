@@ -3,13 +3,13 @@
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
-import type { MouseEvent as ReactMouseEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import type { MouseEvent as ReactMouseEvent, ReactNode } from "react";
 import { usePathname } from "next/navigation";
-import { Anton } from "next/font/google";
 import { scrollToHash } from "@/lib/scroll-to-hash";
-
-const anton = Anton({ subsets: ["latin"], weight: "400", display: "swap" });
+import LanguageSwitcher, { MobileLanguageList } from "@/components/LanguageSwitcher";
+import { useI18n, type ClientDictionary } from "@/components/I18nProvider";
+import type { CapabilitySlug } from "@/lib/i18n/types";
 
 type MenuItem = {
   label: string;
@@ -17,30 +17,63 @@ type MenuItem = {
   children?: { label: string; href: string }[];
 };
 
-const NAV: MenuItem[] = [
-  {
-    label: "About",
-    href: "/#about",
-    children: [
-      { label: "Representative Projects", href: "/#projects" },
-      { label: "Our Mission", href: "/#future" },
-    ],
-  },
-  {
-    label: "Businesses",
-    href: "/#capabilities",
-    children: [
-      { label: "Electrical Systems", href: "/capabilities/electrical-systems" },
-      { label: "Pneumatic Controls", href: "/capabilities/pneumatic-controls" },
-      { label: "Network Infrastructure", href: "/capabilities/network-infrastructure" },
-      { label: "Automation Integration", href: "/capabilities/automation-integration" },
-    ],
-  },
-  { label: "Contact", href: "/contact" },
+const CAPABILITY_SLUGS: CapabilitySlug[] = [
+  "electrical-systems",
+  "pneumatic-controls",
+  "network-infrastructure",
+  "automation-integration",
 ];
+
+function buildNav(dict: ClientDictionary): MenuItem[] {
+  return [
+    {
+      label: dict.nav.about,
+      href: "/#about",
+      children: [
+        { label: dict.nav.representativeProjects, href: "/#projects" },
+        { label: dict.nav.ourMission, href: "/#future" },
+      ],
+    },
+    {
+      label: dict.nav.businesses,
+      href: "/#capabilities",
+      children: CAPABILITY_SLUGS.map((slug) => ({ label: dict.capabilityNames[slug], href: `/capabilities/${slug}` })),
+    },
+    { label: dict.nav.contact, href: "/contact" },
+  ];
+}
+
+function AutoHeight({ children, reduced }: { children: ReactNode; reduced: boolean }) {
+  const innerRef = useRef<HTMLDivElement | null>(null);
+  const [height, setHeight] = useState<number | "auto">("auto");
+
+  useLayoutEffect(() => {
+    const el = innerRef.current;
+    if (!el) return;
+    setHeight(el.offsetHeight);
+    const ro = new ResizeObserver(() => setHeight(el.offsetHeight));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  return (
+    <motion.div
+      initial={false}
+      animate={{ height }}
+      transition={{ duration: reduced ? 0 : 0.55, ease: [0.45, 0, 0.15, 1] }}
+      className="overflow-hidden"
+    >
+      <div ref={innerRef}>{children}</div>
+    </motion.div>
+  );
+}
 
 export default function Header() {
   const prefersReduced = useReducedMotion();
+  const { dict } = useI18n();
+  const NAV = buildNav(dict);
+  const swapIn = (delay: number) => ({ duration: prefersReduced ? 0 : 0.55, delay: prefersReduced ? 0 : 0.14 + delay, ease: [0.25, 1, 0.5, 1] as const });
+  const swapOut = { duration: prefersReduced ? 0 : 0.2, ease: [0.4, 0, 0.6, 1] as const };
   const [openIdx, setOpenIdx] = useState<number | null>(null);
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
   // focusWithin 不再觸發展開，避免 Contact 點擊閃爍
@@ -48,8 +81,9 @@ export default function Header() {
   const [navHover, setNavHover] = useState(false);
   const [allowOverlay, setAllowOverlay] = useState(true);
   const [contactHover, setContactHover] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [mobileSection, setMobileSection] = useState<null | "about" | "biz">(null);
+  const [mobileSection, setMobileSection] = useState<null | "about" | "biz" | "lang">(null);
   const [mobileClosing, setMobileClosing] = useState(false);
   const [closeTimer, setCloseTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
   const pathname = usePathname();
@@ -116,7 +150,7 @@ export default function Header() {
   };
 
   // 在行動選單展開/收起期間，頂部黑底由 overlay 動畫負責，header 本身保持透明以確保兩段動畫連貫
-  const headerIsDarkBase = expanded || contactHover || !allowOverlay || !onHome;
+  const headerIsDarkBase = !onHome;
   const headerIsDark = headerIsDarkBase && !(mobileOpen || mobileClosing);
 
   // Close mobile menu on scroll
@@ -193,11 +227,12 @@ export default function Header() {
             <Image src="/ARK AUTOMATION.svg" alt="Ark Automation" width={165} height={38} priority className="hidden md:block h-[38px] w-auto invert brightness-0" />
           </Link>
 
+          <div className="hidden md:flex items-center md:pr-[max(1.5rem,calc(111px_-_max(0px,(100vw_-_1280px)/2)))]">
           {/* Desktop nav */}
           <nav
             aria-label="Primary"
             role="menubar"
-            className="hidden md:flex items-stretch gap-8 pr-4 md:pr-6"
+            className="flex items-stretch gap-7"
             onMouseMove={(e: ReactMouseEvent<HTMLDivElement>) => {
               if (openIdx === null) return;
               const x = e.clientX;
@@ -260,21 +295,22 @@ export default function Header() {
                       setActiveIdx(next);
                     }
                   }}
-                  className={`inline-flex h-16 items-center px-2 text-lg md:text-lg font-medium ${expanded ? "text-white/90 hover:text-white" : darkBase ? "text-neutral-900 hover:text-neutral-950" : "text-white/90 hover:text-white"}`}
+                  className={`inline-flex h-16 items-center px-1 text-[15px] font-normal ${expanded ? "text-white/90 hover:text-white" : darkBase ? "text-neutral-900 hover:text-neutral-950" : "text-white/90 hover:text-white"}`}
                 >
                   {item.label}
                 </Link>
-                {/* Hover indicator line */}
-                <span className="pointer-events-none absolute bottom-0 left-0 right-0 h-[3px] bg-black transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-200" />
               </div>
             ))}
           </nav>
+
+            <LanguageSwitcher className="ml-5" onOpenChange={setLangOpen} />
+          </div>
 
           {/* Mobile hamburger */}
           <button
             ref={mobileToggleRef}
             className="md:hidden inline-flex items-center justify-center text-white p-0 -mr-1.5"
-            aria-label={mobileOpen ? (mobileSection ? "Back" : "Close navigation") : "Open navigation"}
+            aria-label={mobileOpen ? (mobileSection ? dict.nav.back : dict.nav.closeMenu) : dict.nav.openMenu}
             aria-expanded={mobileOpen}
             onClick={() => {
               if (mobileOpen && mobileSection) {
@@ -291,7 +327,7 @@ export default function Header() {
               }
             }}
           >
-            <span className="sr-only">Menu</span>
+            <span className="sr-only">{dict.nav.openMenu}</span>
             {mobileOpen ? (
               mobileSection ? (
                 // Left arrow icon (same stroke style as scroll-to-top)
@@ -318,11 +354,11 @@ export default function Header() {
           {expanded && (
             <motion.div
               key="submenu"
-              initial={{ opacity: 0, scaleY: 0 }}
-              animate={{ opacity: 1, scaleY: 1, transition: { duration: prefersReduced ? 0 : 0.5, ease: [0.4, 0, 0.2, 1] } }}
-              exit={{ opacity: 0, scaleY: 0.9, transition: { duration: prefersReduced ? 0 : 0.2, ease: [0.4, 0, 0.2, 1] } }}
-              className="absolute inset-0 z-0"
-              style={{ transformOrigin: "top", willChange: "transform, opacity" }}
+              initial={{ clipPath: "inset(0% 0% 100% 0%)" }}
+              animate={{ clipPath: "inset(0% 0% 0% 0%)", transition: { duration: prefersReduced ? 0 : 0.7, ease: [0.33, 1, 0.68, 1] } }}
+              exit={{ clipPath: "inset(0% 0% 100% 0%)", transition: { duration: prefersReduced ? 0 : 0.48, ease: [0.45, 0, 0.55, 1] } }}
+              className="absolute inset-x-0 top-0 z-0"
+              style={{ willChange: "clip-path" }}
               onMouseEnter={() => {
                 if (closeTimer) clearTimeout(closeTimer);
                 setPanelHover(true); panelHoverRef.current = true; setContactHover(false);
@@ -341,56 +377,70 @@ export default function Header() {
                    onMouseLeave={() => setPanelHover(false)}>
                 {/* top horizontal separator aligned under the header */}
                 <div className="absolute left-0 right-0 top-16 h-px bg-neutral-700 pointer-events-none" />
+                <AutoHeight reduced={!!prefersReduced}>
                 <div className="relative mx-auto max-w-7xl px-6 py-6 grid grid-cols-12 gap-8 items-stretch">
                   {/* vertical divider at 1/3 width */}
                   <div className="pointer-events-none absolute top-6 bottom-6 left-[33.333%] w-px bg-white/25 hidden md:block" />
                   {/* Left column: large label with divider at golden ratio (approx 38%) */}
                   <div className="col-span-12 md:col-span-4 relative flex items-center self-stretch">
-                    <h3 className={`${anton.className} text-4xl md:text-5xl font-normal text-white`}>
-                      {NAV[(effectiveIdx ?? visibleIdxRef.current ?? 0)]?.label}
-                    </h3>
-                    {/* left column end */}
+                    <AnimatePresence initial={false} mode="popLayout">
+                      <motion.h3
+                        key={effectiveIdx ?? visibleIdxRef.current ?? 0}
+                        initial={{ opacity: 0, y: 14 }}
+                        animate={{ opacity: 1, y: 0, transition: swapIn(0) }}
+                        exit={{ opacity: 0, y: -8, transition: swapOut }}
+                        className="font-display text-4xl md:text-5xl font-normal text-white"
+                      >
+                        {NAV[(effectiveIdx ?? visibleIdxRef.current ?? 0)]?.label}
+                      </motion.h3>
+                    </AnimatePresence>
                   </div>
                   {/* Right column: children list */}
-                  <div className="col-span-12 md:col-span-8 grid gap-2">
+                  <div className="col-span-12 md:col-span-8 relative">
+                  <AnimatePresence initial={false} mode="popLayout">
+                  <motion.div
+                    key={effectiveIdx ?? visibleIdxRef.current ?? -1}
+                    exit={{ opacity: 0, y: -8, transition: swapOut }}
+                    className="grid gap-2"
+                  >
                     {(NAV[(effectiveIdx ?? visibleIdxRef.current ?? -1)]?.children ?? []).map((c, ci) => (
+                      <motion.div
+                        key={c.label}
+                        initial={{ opacity: 0, y: 14 }}
+                        animate={{ opacity: 1, y: 0, transition: swapIn(0.04 + ci * 0.05) }}
+                      >
                       <Link
                         key={c.label}
                         href={c.href ?? "#"}
                         role="menuitem"
-                        className="block rounded-md px-3 py-[5px] text-lg md:text-xl font-semibold text-white/90 hover:bg-white/10 hover:text-white"
+                        className="block px-3 py-1.5 text-lg md:text-xl font-medium tracking-tight text-white/75 transition-colors hover:text-white"
                         autoFocus={ci === 0}
                         onKeyDown={(e) => { if (e.key === "Escape") { setOpenIdx(null); setActiveIdx(null); } }}
                         onClick={(e) => handleHashNav(e, c.href ?? "#")}
                       >
                         {c.label}
                       </Link>
+                      </motion.div>
                     ))}
+                  </motion.div>
+                  </AnimatePresence>
                   </div>
                 </div>
+                </AutoHeight>
               </div>
             </motion.div>
           )}
-          {/* Header-height overlay (shared animation for Contact hover and About/Businesses expanded) */}
-          {/* Header-height overlay：若 allowOverlay=false，改為靜態黑底，避免動畫重播 */}
-          <>
-            {!allowOverlay && contactHover && !expanded ? (
-              <div className="absolute inset-x-0 top-0 h-16 bg-neutral-950 border-b border-neutral-800 z-0 pointer-events-none" />
-            ) : (
-              <AnimatePresence initial={false}>
-                {contactHover && !expanded && (
-                  <motion.div
-                    key="contact-overlay"
-                    initial={{ opacity: 0, scaleY: 0 }}
-                    animate={{ opacity: 1, scaleY: 1, transition: { duration: prefersReduced ? 0 : 0.35, ease: [0.4, 0, 0.2, 1] } }}
-                    exit={{ opacity: 0, scaleY: 0, transition: { duration: prefersReduced ? 0 : 0.25, ease: [0.4, 0, 0.2, 1] } }}
-                    className="absolute inset-x-0 top-0 h-16 bg-neutral-950 border-b border-neutral-800 z-0 pointer-events-none"
-                    style={{ transformOrigin: "top" }}
-                  />
-                )}
-              </AnimatePresence>
-            )}
-          </>
+          {/* Header-height overlay：從面板直接移到 Contact 時（allowOverlay=false）不重播展開動畫 */}
+          {(contactHover || langOpen) && !expanded && (
+            <motion.div
+              key="contact-overlay"
+              initial={allowOverlay ? { clipPath: "inset(0% 0% 100% 0%)" } : false}
+              animate={{ clipPath: "inset(0% 0% 0% 0%)", transition: { duration: prefersReduced ? 0 : 0.6, ease: [0.33, 1, 0.68, 1] } }}
+              exit={{ clipPath: "inset(0% 0% 100% 0%)", transition: { duration: prefersReduced ? 0 : 0.42, ease: [0.45, 0, 0.55, 1] } }}
+              className="absolute inset-x-0 top-0 h-16 bg-neutral-950 border-b border-neutral-800 z-0 pointer-events-none"
+              style={{ willChange: "clip-path" }}
+            />
+          )}
         </AnimatePresence>
       </div>
 
@@ -412,15 +462,19 @@ export default function Header() {
             <div ref={mobileMenuRef} className="px-5 py-5">
               {mobileSection === null && (
                 <div className="space-y-4">
-                  <button className="block w-full text-left text-2xl font-semibold" onClick={() => setMobileSection("about")}>About</button>
-                  <button className="block w-full text-left text-2xl font-semibold" onClick={() => setMobileSection("biz")}>Businesses</button>
-                  <Link href="/contact" className="block text-2xl font-semibold" onClick={() => { setMobileClosing(true); setMobileOpen(false); }}>Contact</Link>
+                  <button className="block w-full text-left text-2xl font-semibold" onClick={() => setMobileSection("about")}>{dict.nav.about}</button>
+                  <button className="block w-full text-left text-2xl font-semibold" onClick={() => setMobileSection("biz")}>{dict.nav.businesses}</button>
+                  <Link href="/contact" className="block text-2xl font-semibold" onClick={() => { setMobileClosing(true); setMobileOpen(false); }}>{dict.nav.contact}</Link>
+                  <button className="block w-full pt-2 text-left text-2xl font-semibold border-t border-white/15" onClick={() => setMobileSection("lang")}>{dict.nav.language}</button>
                 </div>
+              )}
+              {mobileSection === "lang" && (
+                <MobileLanguageList onSelect={() => { setMobileClosing(true); setMobileOpen(false); setMobileSection(null); }} />
               )}
               {mobileSection === "about" && (
                 <div className="space-y-2">
                   <div className="mt-1 grid">
-                    <Link href="/#projects" className="py-2 text-xl" onClick={() => { setMobileClosing(true); setMobileOpen(false); }}>Representative Projects</Link>
+                    <Link href="/#projects" className="py-2 text-xl" onClick={() => { setMobileClosing(true); setMobileOpen(false); }}>{dict.nav.representativeProjects}</Link>
                     <Link
                       href="/#future"
                       className="py-2 text-xl"
@@ -430,7 +484,7 @@ export default function Header() {
                         setMobileOpen(false);
                       }}
                     >
-                      Our Mission
+                      {dict.nav.ourMission}
                     </Link>
                   </div>
                 </div>
@@ -438,10 +492,9 @@ export default function Header() {
               {mobileSection === "biz" && (
                 <div className="space-y-2">
                   <div className="mt-1 grid">
-                    <Link href="/capabilities/electrical-systems" className="py-2 text-xl" onClick={() => { setMobileClosing(true); setMobileOpen(false); }}>Electrical Systems</Link>
-                    <Link href="/capabilities/pneumatic-controls" className="py-2 text-xl" onClick={() => { setMobileClosing(true); setMobileOpen(false); }}>Pneumatic Controls</Link>
-                    <Link href="/capabilities/network-infrastructure" className="py-2 text-xl" onClick={() => { setMobileClosing(true); setMobileOpen(false); }}>Network Infrastructure</Link>
-                    <Link href="/capabilities/automation-integration" className="py-2 text-xl" onClick={() => { setMobileClosing(true); setMobileOpen(false); }}>Automation Integration</Link>
+                    {CAPABILITY_SLUGS.map((slug) => (
+                      <Link key={slug} href={`/capabilities/${slug}`} className="py-2 text-xl" onClick={() => { setMobileClosing(true); setMobileOpen(false); }}>{dict.capabilityNames[slug]}</Link>
+                    ))}
                   </div>
                 </div>
               )}

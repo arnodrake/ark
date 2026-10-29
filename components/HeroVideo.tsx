@@ -18,9 +18,7 @@ export default function HeroVideo() {
           muted
           playsInline
           preload="auto"
-          poster="/hero/Sequence01.jpg"
         >
-          <source src="/hero/Sequence01.webm" type="video/webm" />
           <source src="/hero/Sequence01.mp4" type="video/mp4" />
         </video>
       ) : (

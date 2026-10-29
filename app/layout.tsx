@@ -1,44 +1,53 @@
 import type { Metadata } from "next";
-import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import ScrollToTop from "@/components/ScrollToTop";
 import HashScroll from "@/components/HashScroll";
+import I18nProvider from "@/components/I18nProvider";
+import { fontVariables } from "@/lib/fonts";
+import { LANGUAGE_META } from "@/lib/i18n/config";
+import { getI18n } from "@/lib/i18n/server";
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  display: "swap",
-  weight: ["400", "500", "600", "700", "800", "900"],
-});
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://arkautomationgroup.com";
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const { dict } = await getI18n();
+  return {
+    metadataBase: new URL(SITE_URL),
+    title: dict.meta.title,
+    description: dict.meta.description,
+    icons: {
+      icon: [{ url: "/ARK.svg", type: "image/svg+xml" }],
+      apple: "/ARK.svg",
+      shortcut: "/ARK.svg",
+    },
+    openGraph: {
+      title: dict.meta.title,
+      description: dict.meta.description,
+      type: "website",
+      images: ["/projects/gigatexas.jpg"],
+    },
+  };
+}
 
-export const metadata: Metadata = {
-  title: "Ark Automation — Built for the Future",
-  description:
-    "Industrial electrical, conveyor assembly, and automation integration across the U.S.",
-  icons: {
-    icon: [{ url: "/ARK.svg", type: "image/svg+xml" }],
-    apple: "/ARK.svg",
-    shortcut: "/ARK.svg",
-  },
-};
-
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { locale, dict } = await getI18n();
+  const clientDict = {
+    nav: dict.nav,
+    capabilityNames: dict.capabilityNames,
+    home: dict.home,
+    footer: dict.footer,
+    cta: dict.cta,
+    contact: dict.contact,
+  };
+
   return (
-    <html lang="en">
+    <html lang={LANGUAGE_META[locale].htmlLang} className={fontVariables}>
       <head>
-        {/* Preconnect & Preload for high-quality media without compression */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         {/* Hero media */}
         <link rel="preload" as="image" href="/ARK.svg" />
         <link rel="preload" as="image" href="/ARK%20AUTOMATION.svg" />
@@ -49,18 +58,10 @@ export default function RootLayout({
           imageSrcSet="/projects/gigatexas.jpg"
           imageSizes="100vw"
         />
-        <link rel="preload" as="image" href="/hero/Sequence01.jpg" />
-        <link rel="preload" as="video" href="/hero/Sequence01.webm" />
-        <link rel="preload" as="video" href="/hero/Sequence01.mp4" />
 
         {/* Favicon / App icon */}
         <link rel="icon" href="/ARK.svg" type="image/svg+xml" />
         <link rel="mask-icon" href="/ARK.svg" color="#000000" />
-        {/* Basic OpenGraph */}
-        <meta property="og:title" content="Ark Automation — Built for the Future" />
-        <meta property="og:description" content="Industrial electrical, network, and automation integration across the U.S." />
-        <meta property="og:type" content="website" />
-        <meta property="og:image" content="/projects/gigatexas.jpg" />
 
         {/* Organization JSON-LD */}
         <script
@@ -70,19 +71,21 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "Organization",
               name: "Ark Automation Inc.",
-              url: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
-              logo: "/ARK.svg",
+              url: SITE_URL,
+              logo: `${SITE_URL}/ARK.svg`,
             }),
           }}
         />
       </head>
-      <body className={`${inter.variable} ${geistMono.variable} antialiased`}>
-        <a className="skip-link" href="#main">Skip to content</a>
-        <Header />
-        {/* no top padding; header overlays hero */}
-        {children}
-        <ScrollToTop />
-        <HashScroll />
+      <body className="antialiased">
+        <I18nProvider locale={locale} dict={clientDict}>
+          <a className="skip-link" href="#main">{dict.nav.skipToContent}</a>
+          <Header />
+          {/* no top padding; header overlays hero */}
+          {children}
+          <ScrollToTop />
+          <HashScroll />
+        </I18nProvider>
       </body>
     </html>
   );

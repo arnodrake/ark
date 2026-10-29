@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { PropsWithChildren, ReactNode } from "react";
 import { fadeInUp, staggerContainer } from "@/lib/motion";
+import { sectionTitle } from "@/lib/typography";
 
 type SectionProps = PropsWithChildren<{
   id?: string;
@@ -32,7 +33,7 @@ export function Section({ id, className, title, children, subdued, dark, center,
         {title ? (
           noMotion ? (
             <div className="mb-10">
-              <h2 className={`text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight ${center ? "mx-auto" : ""}`}>
+              <h2 className={`${sectionTitle} ${center ? "mx-auto" : ""}`}>
                 {title}
               </h2>
             </div>
@@ -44,7 +45,7 @@ export function Section({ id, className, title, children, subdued, dark, center,
               viewport={{ once: true, amount: 0.2 }}
               className="mb-10"
             >
-              <motion.h2 variants={fadeInUp} className={`text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight ${center ? "mx-auto" : ""}`}>
+              <motion.h2 variants={fadeInUp} className={`${sectionTitle} ${center ? "mx-auto" : ""}`}>
                 {title}
               </motion.h2>
             </motion.div>

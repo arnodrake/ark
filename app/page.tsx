@@ -3,19 +3,21 @@
 import Section from "@/components/Section";
 import HeroCarousel from "@/components/HeroCarousel";
 import HeroVideo from "@/components/HeroVideo";
-import { Anton } from "next/font/google";
 import RecentProjects from "@/components/RecentProjects";
 import Image from "next/image";
 import SafeImage from "@/components/SafeImage";
 import CollageScrollReveal from "@/components/CollageScrollReveal";
 import ProjectFocusCard, { ProjectFocusGrid, MobileViewportEdgeBlur } from "@/components/ProjectFocusCard";
 import SiteFooter from "@/components/SiteFooter";
-import { useState, Fragment } from "react";
-
-const anton = Anton({ subsets: ["latin"], weight: "400", display: "swap" });
+import { useState } from "react";
+import { eyebrow, sectionTitle } from "@/lib/typography";
+import { useI18n } from "@/components/I18nProvider";
+import { CONTACT_EMAIL } from "@/components/RichText";
 
 export default function Home() {
-  const [showAllProjects, setShowAllProjects] = useState(false);
+  const { dict, locale } = useI18n();
+  const t = dict.home;
+  const isCJK = locale === "zh" || locale === "ja";
   const LOGOS: Record<string, string> = {
     Tesla: "/logos/tesla.svg",
     TSMC: "/logos/tsmc.svg",
@@ -44,11 +46,11 @@ export default function Home() {
     // 特例：半導體卡片同時顯示三個 Logo
         if (t.includes("tsmc") && t.includes("asml") && t.includes("tel")) {
       return (
-              <div className="flex items-center gap-0 translate-x-[2px] scale-[0.65] md:scale-100 max-w-full overflow-hidden">
+        <div className="flex items-center gap-3 max-w-full">
           <span className="sr-only">{title}</span>
-              <div className="relative h-[30px] w-[126px] translate-x-[2px] shrink-0"><Image src={LOGOS.TSMC} alt="TSMC logo" fill className="object-contain" /></div>
-              <div className="relative h-[18px] w-[68px] -ml-6 md:-ml-6 shrink-0"><Image src={LOGOS.ASML} alt="ASML logo" fill className="object-contain" /></div>
-              <div className="relative h-[18px] w-[70px] -ml-1 top-[2px] translate-x-[2px] shrink-0"><Image src={LOGOS.TEL} alt="TEL logo" fill className="object-contain" /></div>
+          <div className="relative h-[30px] w-[34px] shrink-0"><Image src={LOGOS.TSMC} alt="TSMC logo" fill className="object-contain" /></div>
+          <div className="relative h-[18px] w-[64px] shrink-0"><Image src={LOGOS.ASML} alt="ASML logo" fill className="object-contain" /></div>
+          <div className="relative top-[1px] h-[18px] w-[30px] shrink-0"><Image src={LOGOS.TEL} alt="TEL logo" fill className="object-contain" /></div>
         </div>
       );
     }
@@ -58,11 +60,10 @@ export default function Home() {
       return <span className="text-lg font-semibold text-neutral-900">{title}</span>;
     }
         const boxClass = match.brand === "Lucid" ? "h-7 w-[100px]" : "h-7 w-[120px]";
-    const extraShift = match.brand === "Lucid" || match.brand === "Rivian" ? "mr-2 md:mr-3" : "";
     return (
-          <div className={`relative ${boxClass} ${extraShift} scale-[0.95] sm:scale-100`}>
+          <div className={`relative ${boxClass} origin-left scale-[0.95] sm:scale-100`}>
         <span className="sr-only">{title}</span>
-        <Image src={match.src} alt={`${match.brand} logo`} fill className="object-contain" onError={() => setFailed(true)} />
+        <Image src={match.src} alt={`${match.brand} logo`} fill className="object-contain object-left sm:object-right" onError={() => setFailed(true)} />
       </div>
     );
   }
@@ -70,18 +71,17 @@ export default function Home() {
     <main id="main">
       {/* Full-bleed Hero (background covers the viewport width) */}
       <section id="hero" className="relative overflow-hidden bg-black text-white">
-        <div className="relative pt-36 md:pt-64 pb-32 md:pb-40 min-h-[70vh] md:min-h-[76vh]">
+        <div className="relative flex min-h-svh flex-col justify-center pt-24 pb-[6svh]">
           <HeroVideo />
-          <div className="relative z-10 mx-auto max-w-7xl px-6">
-            <div className="max-w-3xl md:max-w-4xl mt-[3cm] md:mt-[4cm] md:-translate-y-[20px]">
-              <h1 className={`${anton.className} text-[48px] md:text-[60px] lg:text-[72px] font-normal text-white/95 uppercase leading-[1]`}>
-                <span className="block">DATA</span>
-                <span className="block">POWER</span>
-                <span className="block">AUTOMATION</span>
+          <div className="relative z-10 mx-auto w-full max-w-7xl px-5">
+            <div className="-ml-1.5 md:-ml-6">
+              <h1 className="font-display text-[clamp(3.25rem,6.4vw,6rem)] font-normal text-white uppercase leading-[1.06] tracking-[0.005em] [text-shadow:0_2px_28px_rgba(0,0,0,0.38),0_1px_3px_rgba(0,0,0,0.2)]">
+                {t.heroLines.map((line) => (
+                  <span key={line} className="block">{line}</span>
+                ))}
               </h1>
-              <p className="mt-4 md:mt-5 text-[17px] md:text-[22px] text-white/80 max-w-3xl leading-relaxed md:leading-[1.6]">
-                Our integrated electrical, network, and automation systems  
-                are powering the world’s most advanced industrial operations.
+              <p className="mt-6 md:mt-8 max-w-[38rem] text-[clamp(1.125rem,1.6vw,1.5rem)] text-white/85 leading-[1.55]">
+                {t.heroSubtitle}
               </p>
             </div>
           </div>
@@ -95,19 +95,17 @@ export default function Home() {
 
       <Section id="future" dark>
         <div className="text-left md:text-center">
-          <h2 className="mb-8 md:mb-10 text-4xl md:text-4xl lg:text-5xl font-semibold tracking-tight">
-            Built for the Future
+          <h2 className="mb-8 md:mb-12 text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.05]">
+            {t.futureTitle}
           </h2>
-          <div className="space-y-4 max-w-4xl md:mx-auto">
-            <p className="text-lg md:text-[22px] text-white/80 leading-relaxed md:leading-[1.6]">
-              Ark Automation delivers electrical, network, and automation solutions for advanced manufacturing and industrial facilities.
-            </p>
-            <p className="text-lg md:text-[22px] text-white/80 leading-relaxed md:leading-[1.6]">
-              From semiconductor fabs and automotive production lines to mission-critical infrastructure, we execute complex projects with precision, safety, and speed.
-            </p>
-            <p className="text-lg md:text-[22px] text-white/80 leading-relaxed md:leading-[1.6]">
-              Through disciplined field execution and technical expertise, we deliver the infrastructure behind tomorrow&apos;s industry.
-            </p>
+          <div className="space-y-5 md:space-y-6 max-w-6xl md:mx-auto text-lg md:text-xl lg:text-2xl text-white/80 leading-relaxed lg:leading-[1.55] text-pretty">
+            {t.futureParagraphs.map(([first, second]) => (
+              <p key={first}>
+                {first}<br className="hidden lg:inline" />
+                {isCJK ? "" : " "}
+                {second}
+              </p>
+            ))}
           </div>
         </div>
       </Section>
@@ -129,87 +127,36 @@ export default function Home() {
         <MobileViewportEdgeBlur sectionId="projects" />
         <ProjectFocusGrid className="relative z-10">
           <ProjectFocusCard titleFocus className="mb-10">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight">
-              Representative Projects
-            </h2>
+            <h2 className={sectionTitle}>{t.representativeProjects}</h2>
           </ProjectFocusCard>
-          <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 px-1 md:px-0">
-          {[
-            {
-              t: "Tesla – Texas",
-              d:
-                "Comprehensive electrical and mechanical installation for the new production line of Robotaxi, covering structural framing, power and control wiring, cabinets, safety enclosures, and production tooling.",
-            },
-            {
-              t: "TSMC / ASML / TEL – Arizona",
-              d:
-                "High-precision electrical and network installation for semiconductor lithography and process equipment, including ASML photolithography systems and TEL CLEAN TRACK Coater/Developer units.",
-            },
-            {
-              t: "Lucid Motors – Arizona",
-              d:
-                "Electrical, network, and steel-structure installation for an all-new Gravity SUV production line, including power and control wiring, cable trays, fencing, transformers, power distribution panels, and control cabinets.",
-            },
-            {
-              t: "Rivian – Illinois",
-              d:
-                "Complete removal of legacy production lines and installation of new automation systems — including robots, cable trays, transformers, control cabinets, power and control wiring, and safety fencing.",
-            },
-            {
-              t: "Mercedes-Benz – South Carolina",
-              d:
-                "Upgrades to existing production lines integrating new robots, transformers, power distribution panels, and control wiring to modernize assembly operations.",
-            },
-            {
-              t: "Amazon Distribution Centers – Nationwide",
-              d:
-                "Conveyor and automation system installation, including power and control wiring, network systems, and nationwide mobilization support.",
-            },
-          ].map((p, i) => {
-            const isSemi = p.t.includes("TSMC") && p.t.includes("ASML") && p.t.includes("TEL");
-            return (
-              <ProjectFocusCard
-                key={p.t}
-                interactive
-                className="rounded-xl border border-neutral-200 bg-white/90 backdrop-blur-sm p-5 md:p-6 shadow-sm hover:shadow-xl transition-shadow duration-200"
-              >
-                {isSemi ? (
-                  <div className="mb-2 overflow-visible">
-                    {/* Mobile: title與logos同一水平線（logos靠右，間距更緊） */}
-                    <div className="grid grid-cols-[1fr_auto] items-start gap-1 md:hidden">
-                      <div className="min-w-0 font-semibold text-neutral-900 text-left leading-tight pr-1">
-                        <span className="block whitespace-nowrap text-[15px] tracking-tight">{"TSMC\u00A0ASML\u00A0TEL"}</span>
-                        <span className="block">– Arizona</span>
-                      </div>
-                      <div className="flex items-center justify-end gap-0 translate-y-[6px]">
-                        <div className="relative h-[26px] w-[96px]"><Image src={LOGOS.TSMC} alt="TSMC logo" fill className="object-contain" /></div>
-                        <div className="relative h-[22px] w-[62px] -ml-[14px]"><Image src={LOGOS.ASML} alt="ASML logo" fill className="object-contain" /></div>
-                        <div className="relative h-[18px] w-[62px] ml-[4px]"><Image src={LOGOS.TEL} alt="TEL logo" fill className="object-contain" /></div>
-                      </div>
+          <ul className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-6">
+          {t.projects.map((p) => (
+            <li key={p.name}>
+              <ProjectFocusCard interactive lift={false} className="h-full">
+                <div className="group relative isolate flex h-full flex-col bg-white px-5 pt-5 pb-6 lg:px-6 lg:pt-6 lg:pb-7">
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 -z-10 opacity-0 shadow-[0_0_16px_4px_rgba(200,200,200,0.28),0_0_56px_18px_rgba(160,160,160,0.18)] transition-opacity duration-500 ease-out group-hover:opacity-100"
+                  />
+                  <div className="flex flex-col-reverse gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
+                      <p className={`${eyebrow} text-neutral-500`}>
+                        {p.location}
+                      </p>
+                      <h3 className="mt-2 text-xl lg:text-[1.375rem] font-semibold leading-[1.3] tracking-tight text-neutral-950">
+                        {p.name}
+                      </h3>
                     </div>
-                    {/* Desktop: 單行標題，右側組合logo */}
-                    <div className="hidden md:grid md:grid-cols-[1fr_auto] md:items-center md:gap-2">
-                      <div className="min-w-0 text-[18px] font-semibold text-neutral-900 text-left pr-2 whitespace-nowrap">{"TSMC ASML TEL – Arizona"}</div>
-                      <div className="flex items-center justify-end">
-                        <LogoTitle title={p.t} />
-                      </div>
+                    <div className="flex shrink-0 items-center sm:justify-end sm:pt-0.5">
+                      <LogoTitle title={p.name} />
                     </div>
                   </div>
-                ) : (
-                  <div className="mb-2 grid grid-cols-[1fr_auto] items-start gap-2 sm:gap-3 overflow-visible">
-                    <div className="min-w-0 text-[16px] md:text-[18px] font-semibold text-neutral-900 text-left whitespace-normal md:whitespace-nowrap break-words pr-1 md:pr-2">
-                      {p.t}
-                    </div>
-                    <div className="flex-none w-auto max-w-[38%] sm:max-w-none items-center justify-end whitespace-nowrap scale-100 sm:scale-100 overflow-hidden flex shrink-0">
-                      <LogoTitle title={p.t} />
-                    </div>
-                  </div>
-                )}
-                <p className="mt-2 text-neutral-700 text-[15px] md:text-base leading-7 md:leading-7 break-words">{p.d}</p>
+                  <p className="mt-3 text-[15px] lg:text-base leading-relaxed text-neutral-600">{p.description}</p>
+                </div>
               </ProjectFocusCard>
-            );
-          })}
-          </div>
+            </li>
+          ))}
+          </ul>
         </ProjectFocusGrid>
       </Section>
 
@@ -221,19 +168,20 @@ export default function Home() {
         dark
         padYClass="py-20 md:py-24"
         title={
-          <span className={`${anton.className} uppercase block text-[36px] md:text-[54px] lg:text-[64px] leading-[1.25]`}>
-            <span className="block">CONNECT WITH US</span>
-            <span className="block">LET’S BRING YOUR PROJECT TO LIFE</span>
+          <span className="font-display uppercase block text-[36px] md:text-[54px] lg:text-[64px] leading-[1.25]">
+            {t.contactLines.map((line) => (
+              <span key={line} className="block">{line}</span>
+            ))}
           </span>
         }
       >
         <div className="max-w-3xl text-center sm:text-left">
           <div className="mt-6 flex flex-col sm:flex-row sm:flex-wrap gap-3 justify-center sm:justify-start">
-            <a href="mailto:Lucas@arkautomationgroup.com" className="inline-flex items-center justify-center rounded-md bg-white px-5 py-3 text-neutral-900 font-medium hover:bg-white/90">
-              Email Us
+            <a href={`mailto:${CONTACT_EMAIL}`} className="inline-flex items-center justify-center rounded-md bg-white px-5 py-3 text-neutral-900 font-medium hover:bg-white/90">
+              {t.emailUs}
             </a>
             <a href="/contact" className="inline-flex items-center justify-center rounded-md border border-white/30 px-5 py-3 text-white font-medium hover:bg-white/10">
-              Get a Quote
+              {t.getQuote}
             </a>
           </div>
     </div>

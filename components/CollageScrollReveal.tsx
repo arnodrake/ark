@@ -26,12 +26,12 @@ const QUADRANT_OFFSETS = [
   { x: 115, y: 115 },
 ] as const;
 
-/** Mirrors useScroll offset: ["start end", "start 0.15"]. */
+/** Starts when the top reaches 60% of the viewport; completes once the collage is vertically centered. */
 function computeScrollProgress(el: HTMLElement): number {
-  const top = el.getBoundingClientRect().top;
+  const { top, height } = el.getBoundingClientRect();
   const vh = window.innerHeight;
-  const startTop = vh;
-  const endTop = vh * 0.15;
+  const startTop = vh * 0.6;
+  const endTop = Math.min(startTop - 1, Math.max(0, (vh - height) / 2));
   const raw = (startTop - top) / (startTop - endTop);
   return Math.max(0, Math.min(1, raw));
 }

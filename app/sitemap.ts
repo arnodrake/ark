@@ -1,16 +1,12 @@
 import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://arkautomationgroup.com";
   const now = new Date();
 
   const routes: string[] = [
     "/",
     "/contact",
-    "/#about",
-    "/#projects",
-    "/#future",
-    "/#capabilities",
     "/capabilities/electrical-systems",
     "/capabilities/pneumatic-controls",
     "/capabilities/network-infrastructure",
@@ -18,6 +14,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/projects/tesla-giga-texas",
     "/projects/lucid-motors",
     "/projects/mercedes-benz",
+    "/privacy",
+    "/terms",
   ];
 
   return routes.map((path) => ({

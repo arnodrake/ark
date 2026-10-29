@@ -2,9 +2,11 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { useI18n } from "@/components/I18nProvider";
 
 export default function ScrollToTop() {
   const prefersReduced = useReducedMotion();
+  const { dict } = useI18n();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -26,7 +28,7 @@ export default function ScrollToTop() {
 
   return (
     <motion.button
-      aria-label="Back to top"
+      aria-label={dict.nav.backToTop}
       onClick={handleClick}
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: visible ? 1 : 0, scale: visible ? 1 : 0.9 }}

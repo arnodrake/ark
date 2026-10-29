@@ -12,9 +12,34 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter);
+  --font-sans: var(--font-plex-sans), var(--font-cjk, ui-sans-serif), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
   --spacing-section-y: 6rem; /* >= py-24 */
+}
+
+/* Latin glyphs always come from Plex / Anton; CJK glyphs fall through to the per-language face. */
+html:lang(zh-CN) {
+  --font-cjk: var(--font-noto-sc);
+  --font-cjk-display: var(--font-noto-sc);
+  line-break: strict;
+}
+html:lang(ja) {
+  --font-cjk: var(--font-plex-jp);
+  --font-cjk-display: var(--font-noto-jp-black);
+  line-break: strict;
+  word-break: auto-phrase;
+}
+
+.font-display {
+  font-family: var(--font-anton), var(--font-cjk-display, sans-serif), sans-serif;
+}
+/* Anton only ships 400, so disable faux bold: Latin stays Anton while CJK picks the 900 face. */
+html:lang(zh-CN) .font-display,
+html:lang(ja) .font-display {
+  font-weight: 900;
+  font-synthesis-weight: none;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -27,8 +52,8 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
-    Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  font-family: var(--font-plex-sans), var(--font-cjk, ui-sans-serif), ui-sans-serif, system-ui, -apple-system,
+    Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

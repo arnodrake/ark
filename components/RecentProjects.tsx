@@ -1,91 +1,95 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import SafeImage from "@/components/SafeImage";
+import { useI18n } from "@/components/I18nProvider";
+import type { ProjectSlug } from "@/lib/i18n/types";
+import { eyebrow, sectionTitle } from "@/lib/typography";
 
 type ProjectItem = {
-  title: string; // headline
-  summary: string; // description
-  tag: string; // small label (brand/site)
-  imageSrc?: string; // optional cover image under /public
-  href?: string; // learn more link
+  title: string;
+  summary: string;
+  tag: string;
+  imageSrc?: string;
+  href?: string;
 };
 
-const ITEMS: ProjectItem[] = [
-  {
-    tag: "Tesla",
-    title: "Building the Core of Tomorrow's Gigafactory",
-    summary:
-      "Powering large-scale automation and production infrastructure at Tesla Giga Texas.",
-    imageSrc: "/projects/gigatexas.jpg",
-    href: "/projects/tesla-giga-texas",
-  },
-  {
-    tag: "Lucid",
-    title: "Precision in Motion",
-    summary:
-      "High-performance electrical and control installations across Lucid's advanced manufacturing environment.",
-    imageSrc: "/projects/Lucid.jpg",
-    href: "/projects/lucid-motors",
-  },
-  {
-    tag: "Mercedes",
-    title: "Innovation in Every Connection",
-    summary:
-      "Modernizing critical power and automation systems within active vehicle production facilities.",
-    imageSrc: "/projects/Benz.jpg",
-    href: "/projects/mercedes-benz",
-  },
-];
+const IMAGES: Record<ProjectSlug, string> = {
+  "tesla-giga-texas": "/projects/gigatexas.jpg",
+  "lucid-motors": "/projects/Lucid.jpg",
+  "mercedes-benz": "/projects/Benz.jpg",
+};
+
+function ProjectCard({ item, priority, viewLabel }: { item: ProjectItem; priority?: boolean; viewLabel: string }) {
+  return (
+    <Link
+      href={item.href ?? "#projects"}
+      className="group relative isolate flex h-full flex-col outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+    >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 opacity-0 shadow-[0_0_16px_4px_rgba(200,200,200,0.28),0_0_56px_18px_rgba(160,160,160,0.18)] transition-opacity duration-500 ease-out group-hover:opacity-100 group-focus-visible:opacity-100"
+      />
+      <div className="relative aspect-[16/10] sm:aspect-[4/3] overflow-hidden bg-neutral-800">
+        {item.imageSrc ? (
+          <SafeImage
+            src={item.imageSrc}
+            alt={`${item.tag} cover`}
+            fill
+            sizes="(min-width:768px) 33vw, 100vw"
+            className="object-cover transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] group-hover:scale-[1.04]"
+            priority={priority}
+          />
+        ) : null}
+      </div>
+
+      <div className="flex flex-1 flex-col bg-white px-6 pt-6 pb-7 lg:px-7 lg:pt-7 lg:pb-8">
+        <p className={`${eyebrow} text-neutral-500`}>
+          {item.tag}
+        </p>
+        <h3 className="mt-3 text-xl lg:text-[1.375rem] font-semibold leading-[1.3] tracking-tight text-neutral-950">
+          {item.title}
+        </h3>
+        <p className="mt-4 text-[15px] lg:text-base leading-relaxed text-neutral-600">
+          {item.summary}
+        </p>
+        <span className="mt-auto inline-flex items-center gap-2 pt-8 text-sm font-semibold text-neutral-950">
+          {viewLabel}
+          <span
+            aria-hidden
+            className="transition-transform duration-300 ease-out group-hover:translate-x-1"
+          >
+            →
+          </span>
+        </span>
+      </div>
+    </Link>
+  );
+}
 
 export default function RecentProjects() {
+  const { dict } = useI18n();
+  const items: ProjectItem[] = (Object.keys(IMAGES) as ProjectSlug[]).map((slug) => ({
+    ...dict.home.recent[slug],
+    imageSrc: IMAGES[slug],
+    href: `/projects/${slug}`,
+  }));
+
   return (
-    <div className="bg-[#dbe9ea] py-10 sm:py-14 md:py-16">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <h2 id="recent-projects-heading" className="text-xl sm:text-2xl md:text-3xl font-semibold text-neutral-900">
-          Recent Projects
+    <div className="bg-neutral-950 py-16 md:py-24">
+      <div className="mx-auto max-w-7xl px-4 md:px-6">
+        <h2 id="recent-projects-heading" className={`${sectionTitle} text-white`}>
+          {dict.home.recentProjects}
         </h2>
 
-        <div className="mt-5 sm:mt-8 flex flex-col gap-5 sm:gap-6 md:grid md:grid-cols-3 md:gap-8">
-          {ITEMS.map((p, i) => (
-            <article
-              key={i}
-              className="group flex flex-col rounded-xl bg-white ring-1 ring-neutral-200 shadow-sm overflow-hidden transition duration-300"
-            >
-              <div className="relative aspect-[16/10] sm:aspect-[16/9] bg-gradient-to-br from-neutral-100 to-neutral-200 overflow-hidden shrink-0">
-                {p.imageSrc ? (
-                  <SafeImage
-                    src={p.imageSrc}
-                    alt={`${p.tag} cover`}
-                    fill
-                    sizes="(min-width:1024px) 33vw, 100vw"
-                    className="object-cover transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] md:group-hover:scale-[1.06]"
-                    priority={i === 0}
-                  />
-                ) : null}
-              </div>
-              <div className="flex flex-1 flex-col p-4 sm:p-5">
-                <div className="text-xs font-medium text-neutral-500">{p.tag}</div>
-                <h3 className="mt-1.5 sm:mt-2 text-base sm:text-lg font-semibold text-neutral-900 leading-snug">
-                  {p.title}
-                </h3>
-                <p className="mt-2 flex-1 text-neutral-700 text-sm leading-[1.55] sm:leading-6">
-                  {p.summary}
-                </p>
-                <Link
-                  href={p.href ?? "#projects"}
-                  className="mt-3 sm:mt-4 inline-flex items-center text-sm font-medium text-emerald-700 hover:text-emerald-800"
-                >
-                  Learn more →
-                </Link>
-              </div>
-            </article>
+        <ul className="mt-10 grid grid-cols-1 gap-8 md:grid-cols-3 md:gap-6">
+          {items.map((item, i) => (
+            <li key={item.href}>
+              <ProjectCard item={item} priority={i === 0} viewLabel={dict.home.viewProject} />
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
     </div>
   );
 }
-
-

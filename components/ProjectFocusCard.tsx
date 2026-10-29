@@ -117,8 +117,10 @@ export function ProjectFocusGrid({ children, className }: ProjectFocusGridProps)
 type ProjectFocusCardProps = {
   children: ReactNode;
   className?: string;
-  /** Hover to snap focus clear (desktop); includes lift scale. */
+  /** Hover to snap focus clear (desktop). */
   interactive?: boolean;
+  /** With `interactive`, also scale and raise the card on hover. */
+  lift?: boolean;
   /** Section title: delayed focus until first project row is partly visible. */
   titleFocus?: boolean;
 };
@@ -199,6 +201,7 @@ export default function ProjectFocusCard({
   children,
   className,
   interactive = false,
+  lift = true,
   titleFocus = false,
 }: ProjectFocusCardProps) {
   const progress = useContext(FocusProgressContext);
@@ -241,7 +244,7 @@ export default function ProjectFocusCard({
       className={`transform-gpu will-change-[filter,opacity,transform] ${className ?? ""}`}
       onHoverStart={canHover ? () => hoverFocus.set(1) : undefined}
       onHoverEnd={canHover ? () => hoverFocus.set(0) : undefined}
-      whileHover={canHover ? { scale: 1.05, y: -4 } : undefined}
+      whileHover={canHover && lift ? { scale: 1.05, y: -4 } : undefined}
       transition={{ type: "spring", stiffness: 420, damping: 30 }}
     >
       {children}
