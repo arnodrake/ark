@@ -174,7 +174,7 @@ const fr: Dictionary = {
             title: "Une usine taillée pour la grande série",
             paragraphs: [
               "Tesla Giga Texas est l’un des sites de production les plus ambitieux d’Amérique du Nord, réunissant robotique, automatisation et production en grande série sous un même toit.",
-              "Avant la création d’Ark Automation Inc., notre équipe a participé aux travaux d’installation électrique et d’automatisation liés à l’extension de la production du site. Sur un chantier en pleine activité, nous avons contribué à livrer les infrastructures nécessaires aux systèmes de production de nouvelle génération.",
+              "Notre équipe a participé aux travaux d’installation électrique et d’automatisation liés à l’extension de la production du site. Sur un chantier en pleine activité, nous avons contribué à livrer les infrastructures nécessaires aux systèmes de production de nouvelle génération.",
             ],
           },
           {
@@ -214,7 +214,7 @@ const fr: Dictionary = {
             title: "Bilan du projet",
             paragraphs: [
               "Les infrastructures installées dans le cadre de ce projet servent aujourd’hui la production de l’usine Giga Texas de Tesla et accompagnent l’augmentation continue de ses capacités de fabrication de véhicules de pointe.",
-              "Cette expérience illustre le savoir-faire en installation industrielle, la coordination de terrain et les standards d’exécution sur lesquels Ark Automation Inc. s’est ensuite fondée.",
+              "Cette expérience illustre le savoir-faire en installation industrielle, la coordination de terrain et les standards d’exécution qui font la force de notre équipe.",
             ],
           },
         ],
@@ -229,7 +229,7 @@ const fr: Dictionary = {
             title: "Une production placée sous le signe de la précision",
             paragraphs: [
               "Lucid Motors s’est imposé comme l’un des constructeurs de véhicules électriques les plus innovants, alliant ingénierie de pointe, automatisation et qualité de production dans un environnement industriel rigoureusement maîtrisé.",
-              "Avant la création d’Ark Automation Inc., notre équipe a participé aux travaux d’installation électrique et d’automatisation au service de la production de l’usine Lucid en Arizona.",
+              "Notre équipe a participé aux travaux d’installation électrique et d’automatisation au service de la production de l’usine Lucid en Arizona.",
               "Dans des zones de production en activité, nous avons contribué à livrer les infrastructures nécessaires à une fabrication de véhicules fiable et de haute précision.",
             ],
           },
@@ -271,7 +271,7 @@ const fr: Dictionary = {
             title: "Bilan du projet",
             paragraphs: [
               "Les infrastructures installées par notre équipe participent au fonctionnement de l’usine Lucid en Arizona et accompagnent la montée en puissance de sa production de véhicules électriques de pointe.",
-              "Ce projet témoigne du savoir-faire de terrain, de la capacité d’exécution industrielle et de l’exigence de qualité qui sont ensuite devenus le socle d’Ark Automation Inc.",
+              "Ce projet témoigne du savoir-faire de terrain, de la capacité d’exécution industrielle et de l’exigence de qualité qui font la force de notre équipe.",
             ],
           },
         ],
@@ -286,7 +286,7 @@ const fr: Dictionary = {
             title: "Moderniser la production à grande vitesse",
             paragraphs: [
               "Dans l’industrie automobile d’aujourd’hui, les évolutions de l’outil de production doivent souvent être réalisées dans des fenêtres d’arrêt extrêmement courtes. Chaque heure compte, et chaque retard pèse sur le calendrier de redémarrage.",
-              "Avant la création d’Ark Automation Inc., notre équipe a participé aux travaux d’installation électrique et d’automatisation liés à la modernisation de lignes de production dans des usines Mercedes-Benz.",
+              "Notre équipe a participé aux travaux d’installation électrique et d’automatisation liés à la modernisation de lignes de production dans des usines Mercedes-Benz.",
               "Face à des plannings resserrés et à des échéances strictes, notre équipe a contribué à moderniser des infrastructures critiques pendant les arrêts programmés de la production.",
             ],
           },
@@ -329,7 +329,7 @@ const fr: Dictionary = {
             title: "Bilan du projet",
             paragraphs: [
               "Les travaux réalisés dans le cadre de ce projet ont accompagné la modernisation continue de l’outil de production de Mercedes-Benz.",
-              "Ce projet illustre le savoir-faire de terrain, la capacité d’exécution industrielle et la maîtrise des projets à délais contraints qui ont ensuite servi de fondations à Ark Automation Inc.",
+              "Ce projet illustre le savoir-faire de terrain, la capacité d’exécution industrielle et la maîtrise des projets à délais contraints qui font la force de notre équipe.",
               "En menant à bien des mises à niveau électriques et d’automatisation dans une fenêtre d’arrêt limitée, notre équipe a pris part à l’évolution permanente de la construction automobile de pointe.",
             ],
           },

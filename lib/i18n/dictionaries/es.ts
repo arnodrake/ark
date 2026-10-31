@@ -174,7 +174,7 @@ const es: Dictionary = {
             title: "Una fábrica concebida para la gran escala",
             paragraphs: [
               "Tesla Giga Texas es una de las plantas de manufactura más ambiciosas de Norteamérica: reúne robótica, automatización y producción de alto volumen bajo un mismo techo.",
-              "Antes de la constitución de Ark Automation Inc., nuestro equipo participó en trabajos de instalación eléctrica y de automatización para la expansión de la producción en la planta. En plena obra, contribuimos a entregar la infraestructura necesaria para los sistemas de manufactura de nueva generación.",
+              "Nuestro equipo participó en trabajos de instalación eléctrica y de automatización para la expansión de la producción en la planta. En plena obra, contribuimos a entregar la infraestructura necesaria para los sistemas de manufactura de nueva generación.",
             ],
           },
           {
@@ -214,7 +214,7 @@ const es: Dictionary = {
             title: "Impacto del proyecto",
             paragraphs: [
               "La infraestructura instalada en este proyecto respalda las operaciones de manufactura de Tesla Giga Texas y contribuye a la expansión continua de su capacidad de producción de vehículos avanzados.",
-              "Esta experiencia refleja la especialización en instalación industrial, la coordinación en campo y los estándares de ejecución que más tarde formaron parte de los cimientos de Ark Automation Inc.",
+              "Esta experiencia refleja la especialización en instalación industrial, la coordinación en campo y los estándares de ejecución que distinguen a nuestro equipo.",
             ],
           },
         ],
@@ -229,7 +229,7 @@ const es: Dictionary = {
             title: "Una manufactura centrada en la precisión",
             paragraphs: [
               "Lucid Motors se ha consolidado como uno de los fabricantes de vehículos eléctricos más innovadores, al combinar ingeniería avanzada, automatización y calidad de producción en un entorno de manufactura altamente controlado.",
-              "Antes de la constitución de Ark Automation Inc., nuestro equipo participó en trabajos de instalación eléctrica y de automatización para las operaciones de manufactura de la planta de Lucid en Arizona.",
+              "Nuestro equipo participó en trabajos de instalación eléctrica y de automatización para las operaciones de manufactura de la planta de Lucid en Arizona.",
               "En áreas de producción en operación, contribuimos a habilitar la infraestructura necesaria para una manufactura de vehículos confiable y de alta precisión.",
             ],
           },
@@ -271,7 +271,7 @@ const es: Dictionary = {
             title: "Impacto del proyecto",
             paragraphs: [
               "La infraestructura instalada por nuestro equipo contribuye a las operaciones de manufactura de la planta de Lucid en Arizona y respalda el crecimiento continuo de la producción de vehículos eléctricos avanzados.",
-              "Este proyecto refleja la especialización en instalación en campo, la capacidad de ejecución industrial y el compromiso con la calidad que más tarde formaron parte de los cimientos de Ark Automation Inc.",
+              "Este proyecto refleja la especialización en instalación en campo, la capacidad de ejecución industrial y el compromiso con la calidad que distinguen a nuestro equipo.",
             ],
           },
         ],
@@ -286,7 +286,7 @@ const es: Dictionary = {
             title: "Modernizar la manufactura a toda velocidad",
             paragraphs: [
               "En la manufactura automotriz moderna, las mejoras de producción a menudo deben completarse en ventanas de paro sumamente limitadas. Cada hora cuenta, y cualquier retraso afecta el programa de arranque de la producción.",
-              "Antes de la constitución de Ark Automation Inc., nuestro equipo participó en trabajos de instalación eléctrica y de automatización para la modernización de líneas de producción en plantas de Mercedes-Benz.",
+              "Nuestro equipo participó en trabajos de instalación eléctrica y de automatización para la modernización de líneas de producción en plantas de Mercedes-Benz.",
               "Con programas comprimidos y plazos estrictos, nuestro equipo ayudó a ejecutar mejoras críticas de infraestructura durante los paros de producción programados.",
             ],
           },
@@ -329,7 +329,7 @@ const es: Dictionary = {
             title: "Impacto del proyecto",
             paragraphs: [
               "Las mejoras de infraestructura completadas en este proyecto respaldaron los esfuerzos continuos de modernización en las operaciones de manufactura de Mercedes-Benz.",
-              "Este proyecto refleja la especialización en instalación en campo, la capacidad de ejecución industrial y la experiencia en proyectos con programas exigentes que más tarde formaron parte de los cimientos de Ark Automation Inc.",
+              "Este proyecto refleja la especialización en instalación en campo, la capacidad de ejecución industrial y la experiencia en proyectos con programas exigentes que distinguen a nuestro equipo.",
               "Al ejecutar con éxito mejoras eléctricas y de automatización dentro de una ventana de paro limitada, nuestro equipo contribuyó a la evolución continua de la manufactura automotriz avanzada.",
             ],
           },

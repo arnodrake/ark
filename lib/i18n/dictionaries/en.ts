@@ -174,7 +174,7 @@ const en: Dictionary = {
             title: "A Factory Built for Scale",
             paragraphs: [
               "Tesla Giga Texas is one of the most ambitious manufacturing facilities in North America, bringing robotics, automation, and high-volume production together under one roof.",
-              "Before Ark Automation Inc. was formed, our team took part in electrical and automation installation work for production expansion within the facility. Working in an active construction environment, we helped deliver the infrastructure needed for next-generation manufacturing systems.",
+              "Our team took part in electrical and automation installation work for production expansion within the facility. Working in an active construction environment, we helped deliver the infrastructure needed for next-generation manufacturing systems.",
             ],
           },
           {
@@ -214,7 +214,7 @@ const en: Dictionary = {
             title: "Project Impact",
             paragraphs: [
               "The infrastructure installed during this project supports manufacturing operations at Tesla’s Giga Texas facility and contributes to the ongoing expansion of its advanced vehicle production capabilities.",
-              "This experience reflects the industrial installation expertise, field coordination, and execution standards that later helped form the foundation of Ark Automation Inc.",
+              "This experience reflects the industrial installation expertise, field coordination, and execution standards that our team brings to every project.",
             ],
           },
         ],
@@ -229,7 +229,7 @@ const en: Dictionary = {
             title: "Manufacturing Built Around Precision",
             paragraphs: [
               "Lucid Motors has established itself as one of the most innovative electric vehicle manufacturers, combining advanced engineering, automation, and production quality in a tightly controlled manufacturing environment.",
-              "Before Ark Automation Inc. was formed, our team took part in electrical and automation installation work for manufacturing operations at Lucid’s Arizona facility.",
+              "Our team took part in electrical and automation installation work for manufacturing operations at Lucid’s Arizona facility.",
               "Working in active production areas, we helped deliver the infrastructure needed for reliable, high-precision vehicle manufacturing.",
             ],
           },
@@ -271,7 +271,7 @@ const en: Dictionary = {
             title: "Project Impact",
             paragraphs: [
               "The infrastructure installed by our team contributes to manufacturing operations at Lucid’s Arizona facility and supports the continued growth of advanced electric vehicle production.",
-              "This project reflects the field installation expertise, industrial execution capabilities, and commitment to quality that later helped form the foundation of Ark Automation Inc.",
+              "This project reflects the field installation expertise, industrial execution capabilities, and commitment to quality that our team brings to every project.",
             ],
           },
         ],
@@ -286,7 +286,7 @@ const en: Dictionary = {
             title: "Modernizing Manufacturing at Speed",
             paragraphs: [
               "In modern automotive manufacturing, production upgrades often must be completed within extremely limited shutdown windows. Every hour matters, and every delay pushes back the production restart.",
-              "Before Ark Automation Inc. was formed, our team took part in electrical and automation installation work for production line modernization at Mercedes-Benz manufacturing facilities.",
+              "Our team took part in electrical and automation installation work for production line modernization at Mercedes-Benz manufacturing facilities.",
               "Working under compressed schedules and strict deadlines, our team helped execute critical infrastructure upgrades during planned production shutdowns.",
             ],
           },
@@ -329,7 +329,7 @@ const en: Dictionary = {
             title: "Project Impact",
             paragraphs: [
               "The infrastructure upgrades completed during this project supported ongoing modernization across Mercedes-Benz manufacturing operations.",
-              "This project reflects the field installation expertise, industrial execution capabilities, and schedule-driven project experience that later helped form the foundation of Ark Automation Inc.",
+              "This project reflects the field installation expertise, industrial execution capabilities, and schedule-driven project experience that our team brings to every project.",
               "By completing electrical and automation upgrades within a limited shutdown window, our team contributed to the continued evolution of advanced automotive manufacturing.",
             ],
           },

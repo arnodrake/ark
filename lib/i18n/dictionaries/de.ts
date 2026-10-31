@@ -174,7 +174,7 @@ const de: Dictionary = {
             title: "Ein Werk für die Großserie",
             paragraphs: [
               "Tesla Giga Texas zählt zu den ambitioniertesten Fertigungsstandorten Nordamerikas und vereint Robotik, Automatisierung und Großserienproduktion unter einem Dach.",
-              "Noch vor der Gründung der Ark Automation Inc. war unser Team an Elektro- und Automatisierungsinstallationen für den Produktionsausbau im Werk beteiligt. Auf einer laufenden Baustelle haben wir dazu beigetragen, die Infrastruktur für Fertigungssysteme der nächsten Generation zu schaffen.",
+              "Unser Team war an Elektro- und Automatisierungsinstallationen für den Produktionsausbau im Werk beteiligt. Auf einer laufenden Baustelle haben wir dazu beigetragen, die Infrastruktur für Fertigungssysteme der nächsten Generation zu schaffen.",
             ],
           },
           {
@@ -214,7 +214,7 @@ const de: Dictionary = {
             title: "Wirkung des Projekts",
             paragraphs: [
               "Die installierte Infrastruktur unterstützt den Fertigungsbetrieb in Teslas Werk Giga Texas und trägt zum weiteren Ausbau der modernen Fahrzeugproduktion bei.",
-              "Diese Erfahrung steht für die industrielle Installationskompetenz, die Koordination vor Ort und die Ausführungsstandards, die später in das Fundament der Ark Automation Inc. eingeflossen sind.",
+              "Diese Erfahrung steht für die industrielle Installationskompetenz, die Koordination vor Ort und die Ausführungsstandards, die unser Team auszeichnen.",
             ],
           },
         ],
@@ -229,7 +229,7 @@ const de: Dictionary = {
             title: "Fertigung im Zeichen der Präzision",
             paragraphs: [
               "Lucid Motors hat sich als einer der innovativsten Hersteller von Elektrofahrzeugen etabliert und verbindet fortschrittliche Ingenieurskunst, Automatisierung und Fertigungsqualität in einer streng kontrollierten Produktionsumgebung.",
-              "Noch vor der Gründung der Ark Automation Inc. war unser Team an Elektro- und Automatisierungsinstallationen für den Fertigungsbetrieb in Lucids Werk in Arizona beteiligt.",
+              "Unser Team war an Elektro- und Automatisierungsinstallationen für den Fertigungsbetrieb in Lucids Werk in Arizona beteiligt.",
               "In laufenden Produktionsbereichen haben wir dazu beigetragen, die Infrastruktur für eine zuverlässige, hochpräzise Fahrzeugfertigung zu schaffen.",
             ],
           },
@@ -271,7 +271,7 @@ const de: Dictionary = {
             title: "Wirkung des Projekts",
             paragraphs: [
               "Die von unserem Team installierte Infrastruktur trägt zum Fertigungsbetrieb in Lucids Werk in Arizona bei und unterstützt das weitere Wachstum der modernen Elektrofahrzeugproduktion.",
-              "Dieses Projekt steht für die Installationskompetenz vor Ort, die industrielle Umsetzungsstärke und den Qualitätsanspruch, die später in das Fundament der Ark Automation Inc. eingeflossen sind.",
+              "Dieses Projekt steht für die Installationskompetenz vor Ort, die industrielle Umsetzungsstärke und den Qualitätsanspruch, die unser Team auszeichnen.",
             ],
           },
         ],
@@ -286,7 +286,7 @@ const de: Dictionary = {
             title: "Modernisierung unter Zeitdruck",
             paragraphs: [
               "In der modernen Automobilfertigung müssen Linienumbauten oft in äußerst knappen Stillstandsfenstern abgeschlossen werden. Jede Stunde zählt, und jede Verzögerung wirkt sich auf den Termin für den Wiederanlauf der Produktion aus.",
-              "Noch vor der Gründung der Ark Automation Inc. war unser Team an Elektro- und Automatisierungsinstallationen zur Modernisierung von Fertigungslinien in Werken von Mercedes-Benz beteiligt.",
+              "Unser Team war an Elektro- und Automatisierungsinstallationen zur Modernisierung von Fertigungslinien in Werken von Mercedes-Benz beteiligt.",
               "Bei straffen Zeitplänen und festen Fristen haben wir während geplanter Produktionsstillstände kritische Infrastrukturmaßnahmen umgesetzt.",
             ],
           },
@@ -329,7 +329,7 @@ const de: Dictionary = {
             title: "Wirkung des Projekts",
             paragraphs: [
               "Die in diesem Projekt umgesetzten Infrastrukturmaßnahmen unterstützten die fortlaufende Modernisierung der Fertigung bei Mercedes-Benz.",
-              "Dieses Projekt steht für die Installationskompetenz vor Ort, die industrielle Umsetzungsstärke und die Erfahrung mit terminkritischen Projekten, die später in das Fundament der Ark Automation Inc. eingeflossen sind.",
+              "Dieses Projekt steht für die Installationskompetenz vor Ort, die industrielle Umsetzungsstärke und die Erfahrung mit terminkritischen Projekten, die unser Team auszeichnen.",
               "Mit der erfolgreichen Modernisierung der Elektro- und Automatisierungstechnik in einem knappen Stillstandsfenster hat unser Team zur Weiterentwicklung der modernen Automobilfertigung beigetragen.",
             ],
           },
